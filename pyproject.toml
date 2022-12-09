@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gopest"
+description = "A TOUGH2/Waiwera interface to PEST"
+readme = "README.md"
+requires-python = ">=2.7"
+keywords = ["goPEST", "PEST", "Waiwera", "TOUGH2", "AUTOUGH2"]
+license = {text = "BSD 3-Clause License"}
+
+# TODO: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+# ... other project metadata fields as specified in:
+#     https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
