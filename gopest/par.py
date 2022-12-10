@@ -1,5 +1,6 @@
 from t2data import *
-from gopest.common import *
+from gopest.common import TwoWayDict
+from gopest.common import Singleton
 
 # implementation:
 #   a user entry is something simple a user can undersand and easily enter
