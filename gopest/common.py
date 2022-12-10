@@ -8,9 +8,9 @@ class TwoWayDict(dict):
     def __len__(self):
         return dict.__len__(self) / 2
     def __setitem__(self, key, value):
-        if self.has_key(key): raise Exception('TwoWayDict repeated key: %s' % str(key))
+        if key in self: raise Exception('TwoWayDict repeated key: %s' % str(key))
         dict.__setitem__(self, key, value)
-        if self.has_key(value): raise Exception('TwoWayDict repeated key: %s' % str(value))
+        if value in self: raise Exception('TwoWayDict repeated key: %s' % str(value))
         dict.__setitem__(self, value, key)
 
 class Singleton(object):
@@ -50,10 +50,10 @@ def updateDict(dic,lines):
         is a simple string like 'key = val'. """
     keys,vals = [],[]
     for line in lines:
-        if line.count('=') <> 1: raise Exception
+        if line.count('=') != 1: raise Exception
         k,v = line.split('=')
         if k.strip() not in dic:
-            print dic.keys()
+            print(dic.keys())
             raise KeyError
         dic[k.strip()] = eval(v)
     return dic
@@ -70,10 +70,10 @@ def updateObj(obj,lines):
         Each line in lines is a simple string like 'key = val'. """
     keys,vals = [],[]
     for line in lines:
-        if line.count('=') <> 1: raise Exception
+        if line.count('=') != 1: raise Exception
         k,v = line.split('=')
         # if k.strip() not in obj.__dict__.keys():
-        #     print k, ' not supported, try: ', obj.__dict__.keys()
+        #     print(k, ' not supported, try: ', obj.__dict__.keys())
         #     raise KeyError
         setattr(obj,k.strip(),eval(v))
     return obj

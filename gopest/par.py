@@ -1,5 +1,5 @@
 from t2data import *
-from common import *
+from gopest.common import *
 
 # implementation:
 #   a user entry is something simple a user can undersand and easily enter
@@ -69,13 +69,13 @@ class PestParamData(object):
             self.DERCOM,
             ]])
         if f is None:
-            print line
+            print(line)
         else:
             f.write(line + '\n')
 
 
 import inspect
-import par_def
+from gopest import par_def
 PARAM_GETSET = dict(inspect.getmembers(par_def,inspect.isfunction))
 PARAM_TYPE = PARAM_GETSET.keys()
 PARAM_ALIAS = TwoWayDict(par_def.shortNames)
@@ -127,7 +127,7 @@ class UserEntryParam(object):
         cfg = getFromDict(dat.config, keys)
         import re
         pat = re.compile(name)
-        # print "******", [(keys, z) for z in cfg.keys() if pat.match(z)]
+        # print("******", [(keys, z) for z in cfg.keys() if pat.match(z)])
         return [(keys, z) for z in cfg.keys() if pat.match(z)]
     match = {
         'Rocktype':_matchRocktypes,
@@ -144,9 +144,9 @@ class UserEntryParam(object):
         # t2objList      a list of PyTOUGH objects names 'aaa15' or 'BA***' etc
         # t2objType      one of 'Rocktype', 'Element', or 'Generator'
         # defaults       dict of default PestParamData of each PARAM_TYPE
-        if paramListType not in self.ListType: print paramListType, ' is not in ', ListType
-        if t2objListType not in self.ListType: print t2objListType, ' is not in ', ListType
-        for p in [p for p in paramList if p not in PARAM_TYPE]: print p, ' is not valid'
+        if paramListType not in self.ListType: print(paramListType, ' is not in ', ListType)
+        if t2objListType not in self.ListType: print(t2objListType, ' is not in ', ListType)
+        for p in [p for p in paramList if p not in PARAM_TYPE]: print(p, ' is not valid')
         self.t2objList = t2objList
         self.t2objType = t2objType
         self.paramListType=paramListType
@@ -243,7 +243,7 @@ def load_model_config(dat):
     from os.path import splitext, basename, isfile
     import json
     jname = splitext(dat.filename)[0] + '.json'
-    # print "*****", jname
+    # print("*****", jname)
     if isfile(jname):
         with open(jname, 'rU') as jf:
             return json.load(jf)
@@ -303,10 +303,10 @@ def goPESTpar():
 
     import sys
     if len(sys.argv) not in [3,4]:
-        print 'to generate PEST .pst sections and .tpl (for once): '
-        print '     goPESTpar.py origINPUT newPESTtpl'
-        print 'to read PEST generated model file and create real INPUT for Tough2 (for each PEST forward run):'
-        print '     goPESTpar.py origINPUT pestINPUT realINPUT'
+        print('to generate PEST .pst sections and .tpl (for once): ')
+        print('     goPESTpar.py origINPUT newPESTtpl')
+        print('to read PEST generated model file and create real INPUT for Tough2 (for each PEST forward run):')
+        print('     goPESTpar.py origINPUT pestINPUT realINPUT')
 
     if len(sys.argv) == 3:
         origInput = sys.argv[1]
