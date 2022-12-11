@@ -1,6 +1,9 @@
 from t2data import *
 from gopest.common import TwoWayDict
 from gopest.common import Singleton
+from gopest.common import readList
+from gopest.common import updateObj
+from gopest.common import private_cleanup_name
 
 # implementation:
 #   a user entry is something simple a user can undersand and easily enter
@@ -293,21 +296,16 @@ def generate_real_model(origInput, pestModel, realInput):
     save_model_config(dat, dat.config)
 
 def goPESTpar():
-    #from config import *
     import os
-
-    #cfg_name = os.path.split(__file__)[-1].split('.')[0] + '.cfg'
-    #cfg = config().read_from_file(cfg_name)
-    userlistname = os.path.split(__file__)[-1].split('.')[0] + '.list'
-
-
-
     import sys
+
+    userlistname = 'goPESTpar.list'
+
     if len(sys.argv) not in [3,4]:
         print('to generate PEST .pst sections and .tpl (for once): ')
-        print('     goPESTpar.py origINPUT newPESTtpl')
+        print('     gopestpar origINPUT newPESTtpl')
         print('to read PEST generated model file and create real INPUT for Tough2 (for each PEST forward run):')
-        print('     goPESTpar.py origINPUT pestINPUT realINPUT')
+        print('     gopestpar origINPUT pestINPUT realINPUT')
 
     if len(sys.argv) == 3:
         origInput = sys.argv[1]

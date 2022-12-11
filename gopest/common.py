@@ -32,8 +32,7 @@ def readList(f):
         if line.strip()[0] == '#': continue  # comment lines
         if line.strip()[0] == '[':           # [something] item opening
             tmp = line.strip()
-            from string import find
-            ikeyend=find(tmp,']')
+            ikeyend=tmp.find(']')
             keyword=tmp[1:ikeyend]
             if keyword=='END': break         # [END] finishes all
             entryName.append(keyword)
@@ -84,9 +83,9 @@ def private_cleanup_name(s):
     rep = ' .*'
     import string
     rmv = string.punctuation
-    for c in rep: rmv = string.replace(rmv,c,'_')
-    for c in rmv: s = string.replace(s,c,'')
-    for c in rep: s = string.replace(s,c,'_')
+    for c in rep: rmv = rmv.replace(c,'_')
+    for c in rmv: s = s.replace(c,'')
+    for c in rep: s = s.replace(c,'_')
     return s
 
 # Access nested dictionary items via a list of keys
