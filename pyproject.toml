@@ -12,11 +12,16 @@ keywords = ["goPEST", "PEST", "Waiwera", "TOUGH2", "AUTOUGH2"]
 license = {text = "BSD 3-Clause License"}
 # dynamic = ["version"]
 
+dependencies = [
+    "numpy",
+    "PyTOUGH",
+]
+
 # [tool.setuptools.dynamic]
 # version = {attr = "my_package.VERSION"}
 
 [project.scripts]
-goPESTpar = "gopest.par:goPESTpar"
+gopestpar = "gopest.par:goPESTpar"
 
 # TODO: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 # ... other project metadata fields as specified in:
