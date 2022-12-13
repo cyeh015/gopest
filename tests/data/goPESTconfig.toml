@@ -1,0 +1,10 @@
+[simulator]
+input-type = "aut2" # "waiwera" or "aut2"
+output-type = "listing" # "listing" or "h5", will always be "h5" if input-type = "waiwera"
+
+executable = 'autough2'
+# "waiwera": local native waiwera, installed in path
+# "waiwera-dkr": running locally using Docker with pywaiwera installed
+# "waiwera-Maui": calling submit_beopest.py and use Maui
+# "waiwera-Mahuika": calling submit_beopest.py and use Mahuika
+

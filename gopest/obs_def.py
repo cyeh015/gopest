@@ -39,7 +39,12 @@
 #
 # I have done something major to allow the more flexible ways of specifying each observation.
 
+from gopest.common import config as cfg
 
+if 'waiwera' in cfg['simulator']['executable']:
+    sim = 'waiwera'
+else:
+    sim = 'aut2'
 FIELD = {
     'aut2': {
         'temp': 'Temperatu',
@@ -55,7 +60,7 @@ FIELD = {
         'rate': 'source_rate',
         'enth': 'source_enthalpy',
     },
-}['waiwera']
+}[sim]
 
 
 PLOT_RAW_FIELD_DATA = True
