@@ -22,9 +22,14 @@ dependencies = [
 # [tool.setuptools.dynamic]
 # version = {attr = "my_package.VERSION"}
 
+[tool.setuptools.packages.find]
+exclude = ["tests"]
+
 [project.scripts]
 gopestpar = "gopest.par:goPESTpar"
 gopestobs = "gopest.obs:goPESTobs"
+
+pest_model = "gopest.pest_model:main_cli"
 
 # TODO: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 # ... other project metadata fields as specified in:
