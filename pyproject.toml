@@ -14,6 +14,8 @@ license = {text = "BSD 3-Clause License"}
 
 dependencies = [
     "numpy",
+    "scipy",
+    "h5py",
     "PyTOUGH",
 ]
 
@@ -22,6 +24,7 @@ dependencies = [
 
 [project.scripts]
 gopestpar = "gopest.par:goPESTpar"
+gopestobs = "gopest.obs:goPESTobs"
 
 # TODO: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 # ... other project metadata fields as specified in:
