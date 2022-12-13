@@ -17,6 +17,7 @@ dependencies = [
     "scipy",
     "h5py",
     "PyTOUGH",
+    "toml",
 ]
 
 # [tool.setuptools.dynamic]
@@ -31,6 +32,9 @@ gopestobs = "gopest.obs:goPESTobs"
 
 pest_model = "gopest.pest_model:main_cli"
 run_ns_pr = "gopest.run_ns_pr:main_cli"
+
+submit_pest = "gopest.submit_beopest:submit_cli" 
+# run_pest = 
 
 # TODO: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 # ... other project metadata fields as specified in:

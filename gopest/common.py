@@ -1,3 +1,15 @@
+import toml
+
+
+""" this allows gopest.common.config to be used directly, eg.
+        from gopest.common import config as cfg
+        print(cfg['pest']['executable'])
+        print(cfg['simulator']['executable'])
+"""
+ftoml = 'goPESTconfig.toml'
+with open(ftoml, 'r') as f:
+    config = toml.load(f)
+
 
 ########## utility classes and functions
 class TwoWayDict(dict):
