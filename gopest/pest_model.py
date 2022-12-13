@@ -15,7 +15,7 @@ To generate/overwrite/fix the model/batch files, use:
     python make_batch_files.py
 """
 
-from run_ns_pr import run_ns_pr
+from gopest.run_ns_pr import run_ns_pr
 from gopest.par import generate_real_model
 from gopest.obs import read_from_real_model
 import time
@@ -28,7 +28,6 @@ import os
 from os import devnull, system, remove, sep, path
 from shutil import copy2
 from shutil import Error
-from itertools import izip
 from time import sleep
 
 def get_master_dir():
@@ -56,19 +55,19 @@ def get_slave_id():
 
 def par_match(pf1, pf2):
     matched = False
-    with open(pf1,'rU') as a:
-        with open(pf2,'rU') as b:
+    with open(pf1,'r') as a:
+        with open(pf2,'r') as b:
             # once open successfully, assume equal, until something fails
             matched = True
             try:
-                for aa,bb in izip(a,b):
+                for aa,bb in zip(a,b):
                     ax, bx = float(aa.split(',')[0]), float(bb.split(',')[0])
                     assert_approx_equal(ax, bx, significant=7)
             except AssertionError:
                 matched = False
     return matched
 
-def main(obsreref, svdai, testup, local, skiprun, useobf, sendbad, skippr, hdf5, waiwera):
+def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, waiwera):
     print("----- Running " + " ".join(sys.argv[1:]))
     if local:
         master_dir = '.'

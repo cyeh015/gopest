@@ -55,7 +55,7 @@ FIELD = {
         'rate': 'source_rate',
         'enth': 'source_enthalpy',
     },
-}['aut2']
+}['waiwera']
 
 
 PLOT_RAW_FIELD_DATA = True
