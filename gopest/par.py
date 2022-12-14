@@ -1,4 +1,11 @@
+import json
+from os.path import splitext, basename, isfile
+import inspect
+import functools
+from collections import OrderedDict
+
 from t2data import *
+
 from gopest.common import TwoWayDict
 from gopest.common import Singleton
 from gopest.common import readList
@@ -13,6 +20,15 @@ from gopest.common import private_cleanup_name
 
 # i need a dictionary, leys of parameter data type (short), which maps to
 # functions from the user defined functions that can modify t2data objects
+
+from gopest.common import config as cfg
+INPUT_TYPE = cfg['simulator']['input-type']
+
+from gopest import par_def
+par_classes = {}
+for n,c in inspect.getmembers(par_def, inspect.isclass):
+    if issubclass(c, par_def.ParDef):
+        par_classes[n] = c
 
 class PestParamGroups(object):
     """ representation of entries in PEST * parameter groups """
@@ -78,10 +94,6 @@ class PestParamData(object):
             f.write(line + '\n')
 
 
-import inspect
-from gopest import par_def
-PARAM_GETSET = dict(inspect.getmembers(par_def,inspect.isfunction))
-PARAM_TYPE = PARAM_GETSET.keys()
 PARAM_ALIAS = TwoWayDict(par_def.shortNames)
 
 class PestParamDataName(Singleton):
@@ -106,51 +118,18 @@ class UserEntryParam(object):
     """ understands user entry group and its setings, type.  and will be
     responsible of creating PestParamData objects, as each * parameter data
     in PEST """
-    def _matchRocktypes(dat,name):
-        import re
-        pat = re.compile(name)
-        return [r.name for r in dat.grid.rocktypelist if pat.match(r.name)]
-    def _matchElements(dat,name):
-        import re
-        pat = re.compile(name)
-        return [b.name for b in dat.grid.blocklist if pat.match(b.name)]
-    def _matchGenerators(dat,name):
-        import re
-        pat = re.compile(name)
-        return [g.name for g in dat.generatorlist if pat.match(g.name)]
-    def _matchConfigRechCoeff(dat,name):
-        import re
-        pat = re.compile(name)
-        return [z for z in dat.config['RechCoefficients'].keys() if pat.match(z)]
-    def _matchConfig(dat, key_name):
-        # expects key_name as a tuple (keys, name) where keys is a list of "keys",
-        # which can be strings or even integer, so that dat.config[key1][key2]...
-        # can access the desired config entry
-
-        keys, name = key_name
-        cfg = getFromDict(dat.config, keys)
-        import re
-        pat = re.compile(name)
-        # print("******", [(keys, z) for z in cfg.keys() if pat.match(z)])
-        return [(keys, z) for z in cfg.keys() if pat.match(z)]
-    match = {
-        'Rocktype':_matchRocktypes,
-        'Element':_matchElements,
-        'Generator':_matchGenerators,
-        'Config':_matchConfig,
-        'ConfigRechCoeff':_matchConfigRechCoeff,
-        }
     ListType = ['ForEach','SingleValue','TiedValues']
-    def __init__(self,paramListType,paramList,t2objListType,t2objList,t2objType,dat,defaults=None):
+    def __init__(self, paramListType, paramList, t2objListType, t2objList, t2objType,
+                 dat, defaults=None):
         # paramListType  'ForEach' or 'SingleValue' or 'TiedValues'
         # paramList      a list of 'permeability_1' or 'porosity' etc
         # t2objListType  'ForEach' or 'SingleValue' or 'TiedValues'
         # t2objList      a list of PyTOUGH objects names 'aaa15' or 'BA***' etc
         # t2objType      one of 'Rocktype', 'Element', or 'Generator'
         # defaults       dict of default PestParamData of each PARAM_TYPE
-        if paramListType not in self.ListType: print(paramListType, ' is not in ', ListType)
-        if t2objListType not in self.ListType: print(t2objListType, ' is not in ', ListType)
-        for p in [p for p in paramList if p not in PARAM_TYPE]: print(p, ' is not valid')
+        if paramListType not in self.ListType: raise Exception(paramListType, ' is not in ', ListType)
+        if t2objListType not in self.ListType: raise Exception(t2objListType, ' is not in ', ListType)
+        for p in [p for p in paramList if p not in par_classes]: raise Exception(p, ' is not valid')
         self.t2objList = t2objList
         self.t2objType = t2objType
         self.paramListType=paramListType
@@ -159,7 +138,7 @@ class UserEntryParam(object):
         from copy import deepcopy
         self.defaults=deepcopy(defaults)
 
-        # generate these by calling makeParamDataNames, pest *parameter data entries
+        # generate these by calling makeParamDataNames, pest *  parameter data entries
         self.paramData = None
         self.ties = None
 
@@ -170,12 +149,26 @@ class UserEntryParam(object):
         self.paramData = []
         self.ties = []
 
-        matchedList = []
-        for n in self.t2objList:
-            matched_names = self.match[self.t2objType](dat,n)
-            for m in matched_names:
-                if m not in matchedList:
-                    matchedList.append(m)
+        # reuse ParDef instances (used as getter/setter here) for param type
+        par_getters = {}
+        for pt in self.paramList:
+            if pt not in par_getters:
+                par_getters[pt] = par_classes[pt](INPUT_TYPE)
+
+        # obtain a list of names that exists in all self.paramList and self.t2objList
+        # use OrderedDict as an ordered set, to remember order (ordr is noce to have)
+        names = []
+        intersect = None
+        for pt in self.paramList:
+            for pattern in self.t2objList:
+                a = par_getters[pt].find_names(dat, pattern)
+                names += a
+                if intersect is None:
+                    intersect = set(a)
+                else:
+                    intersect = intersect & set(a)
+        name_order = OrderedDict.fromkeys(names).keys()
+        matchedList = [n for n in name_order if n in intersect]
 
         # if both ForEach
         for t2o in matchedList:
@@ -202,7 +195,7 @@ class UserEntryParam(object):
                 else:
                     pd = PestParamData()
                 pd.PARNME = nname
-                pd.PARVAL1 = PARAM_GETSET[pt]([t2o],dat)
+                pd.PARVAL1 = par_getters[pt].get(dat, t2o)
                 self.paramData.append(pd)
                 theline = "$%-" + str(pd.TEMPLATEWIDTH) + 's$, %-20s, "%s"\n'
                 tpl.write(theline % (nname, ('"%s"' % pt), str([t2o])))
@@ -211,9 +204,8 @@ def readUserParameter(userListName, dat):
     """ returns a list of UserEntryParam from reading the file with name
         userListName """
     userEntries = []
-    f = open(userListName,'rU')
-    entryName, entry = readList(f)
-    f.close()
+    with open(userListName,'r') as f:
+        entryName, entry = readList(f)
     # some defaults even if no sections exists:
     parDefaults = {}
     for i,en in enumerate(entryName):
@@ -244,8 +236,6 @@ def readUserParameter(userListName, dat):
 def load_model_config(dat):
     """ Return config dict loaded from .json file with same model base name.
     """
-    from os.path import splitext, basename, isfile
-    import json
     jname = splitext(dat.filename)[0] + '.json'
     # print("*****", jname)
     if isfile(jname):
@@ -257,8 +247,6 @@ def load_model_config(dat):
 def save_model_config(dat, config):
     """ Saves config (dict) object into .json using same basename as t2data.
     """
-    from os.path import splitext, basename
-    import json
     jname = splitext(dat.filename)[0] + '.json'
     with open(jname, 'w') as jf:
         json.dump(config, jf, indent=4)
@@ -266,12 +254,21 @@ def save_model_config(dat, config):
 def generate_params_and_tpl(origInput, tplToWrite, par_data):
     """ this reads goPESTpar.list and generate appropriate template file and
     writes * parameter data lines into a file """
-    dat = t2data(origInput)
-    dat.config = load_model_config(dat)
+    if INPUT_TYPE == 'aut2':
+        dat = t2data(origInput)
+        dat.config = load_model_config(dat)
+    elif INPUT_TYPE == 'waiwera':
+        with open(origInput, 'r') as f:
+            dat = json.load(f)
+    else:
+        raise Exception()
 
     uentry = readUserParameter('goPESTpar.list', dat)
 
-    parf = open(par_data, 'w')
+    if par_data is not None:
+        parf = open(par_data, 'w')
+    else:
+        parf = None
     tpl = open(tplToWrite, 'w')
     tpl.write('ptf $\n')
     for up in uentry:
@@ -279,21 +276,38 @@ def generate_params_and_tpl(origInput, tplToWrite, par_data):
         for pp in up.paramData:
             pp.write(parf)
     tpl.close()
-    parf.close()
+    if parf is not None:
+        parf.close()
 
 def generate_real_model(origInput, pestModel, realInput):
     """ this reads PEST generated model file and create the real TOUGH2 model
     """
-    dat = t2data(origInput)
-    dat.config = load_model_config(dat)
-    pmodel = open(pestModel,'r')
-    for line in pmodel.readlines():
-        vals = eval(line.strip())
-        pestValue, paramType, names = vals[0], vals[1], eval(vals[2])
-        PARAM_GETSET[paramType](names,dat,pestValue)
+    if INPUT_TYPE == 'aut2':
+        dat = t2data(origInput)
+        dat.config = load_model_config(dat)
+    elif INPUT_TYPE == 'waiwera':
+        with open(origInput, 'r') as f:
+            dat = json.load(f)
+    else:
+        raise Exception()
 
-    dat.write(realInput, extra_precision=True, echo_extra_precision=True)
-    save_model_config(dat, dat.config)
+    # reuse ParDef instances (used as getter/setter here) for param type
+    par_setters = {}
+
+    with open(pestModel,'r') as pmodel:
+        for line in pmodel.readlines():
+            vals = eval(line.strip())
+            pestValue, paramType, names = vals[0], vals[1], eval(vals[2])
+            if paramType not in par_setters:
+                par_setters[paramType] = par_classes[paramType](INPUT_TYPE)
+            par_setters[paramType].set(dat, names[0], pestValue)
+
+    if INPUT_TYPE == 'aut2':
+        dat.write(realInput, extra_precision=True, echo_extra_precision=True)
+        save_model_config(dat, dat.config)
+    elif INPUT_TYPE == 'waiwera':
+        with open(realInput, 'w') as f:
+            json.dump(dat, f, indent=4, sort_keys=True)
 
 def goPESTpar():
     import os
@@ -310,23 +324,12 @@ def goPESTpar():
     if len(sys.argv) == 3:
         origInput = sys.argv[1]
         tplToWrite = sys.argv[2]
-
-        dat = t2data(origInput)
-        dat.config = load_model_config(dat)
-
-        uentry = readUserParameter(userlistname, dat)
-
-        tpl = open(tplToWrite,'w')
-        tpl.write('ptf $\n')
-        for up in uentry:
-            up.makeParamData(dat,tpl)
-            for pp in up.paramData:
-                pp.write()
-        tpl.close()
+        # write *param data lines to screen
+        generate_params_and_tpl(origInput, tplToWrite, None)
 
     if len(sys.argv) == 4:
         origInput = sys.argv[1]
         pestModel = sys.argv[2]
         realInput = sys.argv[3]
-        generate_real_model(origInput, pestModel, realInput)
 
+        generate_real_model(origInput, pestModel, realInput)
