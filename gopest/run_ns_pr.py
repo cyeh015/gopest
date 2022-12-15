@@ -1,19 +1,22 @@
-from mulgrids import *
-from t2data import *
-from t2listing import *
-from t2incons import *
-import h5py
-import gener_groups
 import sys
 import os
 import time
 import re
 import json
-import numpy as np
 import tarfile
+import subprocess
 from shutil import copy2, move
 from time import sleep
-import subprocess
+
+import numpy as np
+import h5py
+
+from mulgrids import *
+from t2data import *
+from t2listing import *
+from t2incons import *
+
+from gopest.utils import gener_groups
 
 def tail(filename, n=10):
     """ Return the last n lines of a file """

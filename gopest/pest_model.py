@@ -15,13 +15,7 @@ To generate/overwrite/fix the model/batch files, use:
     python make_batch_files.py
 """
 
-from gopest.run_ns_pr import run_ns_pr
-from gopest.par import generate_real_model
-from gopest.obs import read_from_real_model
 import time
-
-from numpy.testing import assert_approx_equal
-
 import sys
 import glob
 import os
@@ -29,6 +23,12 @@ from os import devnull, system, remove, sep, path
 from shutil import copy2
 from shutil import Error
 from time import sleep
+
+from numpy.testing import assert_approx_equal
+
+from gopest.run_ns_pr import run_ns_pr
+from gopest.par import generate_real_model
+from gopest.obs import read_from_real_model
 
 def get_master_dir():
     with open('_master_dir', 'r') as f:

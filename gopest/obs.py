@@ -1,18 +1,19 @@
+import time
+import json
+import inspect
+
 from mulgrids import *
 from t2data import *
 from t2listing import *
-from waiwera_listing import wlisting
-import time
-import json
 
 from gopest.common import Singleton
 from gopest.common import TwoWayDict
 from gopest.common import readList
 from gopest.common import updateObj
 from gopest.common import merge_dols
-import inspect
 from gopest import obs_def
 
+from gopest.utils.waiwera_listing import wlisting
 
 OBS_USER_FUNC = dict(inspect.getmembers(obs_def,inspect.isfunction))
 OBS_ALIAS = TwoWayDict(obs_def.shortNames)
@@ -232,7 +233,6 @@ def read_from_real_model(fgeo, fdat, flst, fobf, waiwera=False):
 
 def goPESTobs(argv=[]):
     START_TIME = time.time()
-    #from config import *
 
     userlistname = 'goPESTobs.list'
 

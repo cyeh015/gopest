@@ -1,4 +1,9 @@
 import toml
+import string
+
+# Access nested dictionary items via a list of keys
+from functools import reduce  # forward compatibility for Python 3
+import operator
 
 from gopest.defaults import default_cfg
 
@@ -104,16 +109,11 @@ def private_cleanup_name(s):
     """ cleans up string so no space, no funny symbols.  it will remove all
     punctuations chars apart from those specified in rep, which will be '_' """
     rep = ' .*'
-    import string
     rmv = string.punctuation
     for c in rep: rmv = rmv.replace(c,'_')
     for c in rmv: s = s.replace(c,'')
     for c in rep: s = s.replace(c,'_')
     return s
-
-# Access nested dictionary items via a list of keys
-from functools import reduce  # forward compatibility for Python 3
-import operator
 
 def getFromDict(dataDict, mapList):
     return reduce(operator.getitem, mapList, dataDict)
