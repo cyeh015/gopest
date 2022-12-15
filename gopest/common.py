@@ -1,5 +1,6 @@
 import toml
 
+from gopest.defaults import default_cfg
 
 """ this allows gopest.common.config to be used directly, eg.
         from gopest.common import config as cfg
@@ -7,9 +8,19 @@ import toml
         print(cfg['simulator']['executable'])
 """
 ftoml = 'goPESTconfig.toml'
-with open(ftoml, 'r') as f:
-    config = toml.load(f)
-
+try:
+    with open(ftoml, 'r') as f:
+        config = toml.load(f)
+except FileNotFoundError:
+    print("Error! Config file '%s' is not found." % ftoml)
+    ans = input('Do you want goPEST to create a default file? (y/n) ')
+    if 'y' in ans.lower():
+        with open(ftoml, 'w') as f:
+            f.write(default_cfg)
+        config = toml.loads(default_cfg)
+    else:
+        print('Existing...')
+        exit(1)
 
 ########## utility classes and functions
 class TwoWayDict(dict):

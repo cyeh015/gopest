@@ -1,19 +1,11 @@
 import sys
-import gopest.par
-import gopest.obs
-import gopest.pest_model
-import gopest.run_ns_pr
-import gopest.submit_beopest
-import gopest.make_case_pst
-
 from setuptools_scm import get_version
 
 title = """
 goPEST - Interfacing PEST with Waiwera and (AU)TOUGH2 simulators
 """
 
-version = """
-Version: (%s)
+version = """Version: (%s)
 """ % get_version(root='..', relative_to=__file__)
 
 hlp = """
@@ -41,22 +33,32 @@ University of Auckland, 2012, 2022
 """
 
 def gopest_cli():
+    print(title)
     argc = len(sys.argv)
     if argc < 2:
-        print(title + version + hlp)
+        print(version + hlp)
     else:
-        cmds = {
-            'par': gopest.par.goPESTpar,
-            'obs': gopest.obs.goPESTobs,
-            'run-pest-model': gopest.pest_model.main_cli,
-            'run-ns-pr': gopest.run_ns_pr.main_cli,
-            'submit': gopest.submit_beopest.submit_cli,
-            'init': gopest.make_case_pst.make_case_cli,
-        }
-        if sys.argv[1] == 'help' or sys.argv[1] not in cmds:
-            print(title + hlp)
+        if sys.argv[1] == 'help':
+            print(version + hlp)
         else:
-            print(title)
+            import gopest.par
+            import gopest.obs
+            import gopest.pest_model
+            import gopest.run_ns_pr
+            import gopest.submit_beopest
+            import gopest.make_case_pst
+            cmds = {
+                'par': gopest.par.goPESTpar,
+                'obs': gopest.obs.goPESTobs,
+                'run-pest-model': gopest.pest_model.main_cli,
+                'run-ns-pr': gopest.run_ns_pr.main_cli,
+                'submit': gopest.submit_beopest.submit_cli,
+                'init': gopest.make_case_pst.make_case_cli,
+            }
+            if sys.argv[1] not in cmds:
+                print(version + hlp)
+                print('Error! COMMAND not recognised.')
+                exit(1)
             cmds[sys.argv[1]](*sys.argv[2:])
 
 """
