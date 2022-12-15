@@ -42,8 +42,9 @@ gopest = "gopest.commands:gopest_cli"
 # ... other project metadata fields as specified in:
 #     https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 
-# to bump version, git tag (annotated) a version eg. v0.1.0
-
-# to build sdist and wheel, use python -m build
-
-# 
+# to bump version, git tag (annotated) a version eg. 'v0.1.0'
+#
+# to build sdist and wheel, use: python -m build
+#
+# to upload to PyPI, use: python -m twine upload dist/xx.tar.gz dist/xx.whl
+# (this requires PyPI username and password)
