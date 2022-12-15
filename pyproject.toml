@@ -36,6 +36,8 @@ run_ns_pr = "gopest.run_ns_pr:main_cli"
 submit_pest = "gopest.submit_beopest:submit_cli" 
 # run_pest = 
 
+makecase = "gopest.make_case_pst:make_case_cli"
+
 # TODO: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 # ... other project metadata fields as specified in:
 #     https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
