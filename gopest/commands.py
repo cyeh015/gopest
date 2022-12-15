@@ -8,12 +8,16 @@ import gopest.make_case_pst
 
 from setuptools_scm import get_version
 
-title = """goPEST - Interfacing PEST with Waiwera and (AU)TOUGH2 simulators"""
+title = """
+goPEST - Interfacing PEST with Waiwera and (AU)TOUGH2 simulators
+"""
 
-version = '    ' + get_version(root='..', relative_to=__file__)
+version = """
+Version: (%s)
+""" % get_version(root='..', relative_to=__file__)
 
-hlp = """Use:
-    gopest COMMAND [ARGUMENTS]
+hlp = """
+Usage: gopest COMMAND [ARGUMENTS]
 
 Supported COMMANDs:
     help
