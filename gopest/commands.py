@@ -59,7 +59,7 @@ def gopest_cli():
                 print(version + hlp)
                 print('Error! COMMAND not recognised.')
                 exit(1)
-            cmds[sys.argv[1]](*sys.argv[2:])
+            cmds[sys.argv[1]](sys.argv[1:])
 
 """
 - NOTE good reference on designing CLI command names:
