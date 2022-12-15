@@ -14,6 +14,11 @@
 # these short names will be used as part of names in * parameter data
 #
 
+# TODO: consider using munch to allow access dictionary with object-oriented
+# style? see:
+# https://github.com/Infinidat/munch
+# https://stackoverflow.com/questions/1305532/how-to-convert-a-nested-python-dict-to-object
+
 import re
 
 from gopest.common import getFromDict, setInDict

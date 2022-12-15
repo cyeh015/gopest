@@ -18,10 +18,13 @@ dependencies = [
     "h5py",
     "PyTOUGH",
     "toml",
+    "setuptools_scm",
 ]
 
 # [tool.setuptools.dynamic]
 # version = {attr = "my_package.VERSION"}
+
+[tool.setuptools_scm]
 
 [tool.setuptools.packages.find]
 exclude = ["tests"]

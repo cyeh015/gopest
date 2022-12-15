@@ -6,8 +6,12 @@ import gopest.run_ns_pr
 import gopest.submit_beopest
 import gopest.make_case_pst
 
-title = """goPEST - Interfacing PEST with Waiwera and (AU)TOUGH2 simulators
-"""
+from setuptools_scm import get_version
+
+title = """goPEST - Interfacing PEST with Waiwera and (AU)TOUGH2 simulators"""
+
+version = '    ' + get_version(root='..', relative_to=__file__)
+
 hlp = """Use:
     gopest COMMAND [ARGUMENTS]
 
@@ -35,7 +39,7 @@ University of Auckland, 2012, 2022
 def gopest_cli():
     argc = len(sys.argv)
     if argc < 2:
-        print(title + hlp)
+        print(title + version + hlp)
     else:
         cmds = {
             'par': gopest.par.goPESTpar,
@@ -50,3 +54,10 @@ def gopest_cli():
         else:
             print(title)
             cmds[sys.argv[1]](*sys.argv[2:])
+
+"""
+- NOTE good reference on designing CLI command names:
+  https://smallstep.com/blog/the-poetics-of-cli-command-names/
+
+- TODO it's probably not necessary to have so many commands
+"""
