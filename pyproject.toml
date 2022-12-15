@@ -28,16 +28,6 @@ exclude = ["tests"]
 
 [project.scripts]
 gopest = "gopest.commands:gopest_cli"
-gopestpar = "gopest.par:goPESTpar"
-gopestobs = "gopest.obs:goPESTobs"
-
-pest_model = "gopest.pest_model:main_cli"
-run_ns_pr = "gopest.run_ns_pr:main_cli"
-
-submit_pest = "gopest.submit_beopest:submit_cli" 
-# run_pest = 
-
-makecase = "gopest.make_case_pst:make_case_cli"
 
 # TODO: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 # ... other project metadata fields as specified in:
