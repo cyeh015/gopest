@@ -27,6 +27,7 @@ dependencies = [
 exclude = ["tests"]
 
 [project.scripts]
+gopest = "gopest.commands:gopest_cli"
 gopestpar = "gopest.par:goPESTpar"
 gopestobs = "gopest.obs:goPESTobs"
 

@@ -309,27 +309,24 @@ def generate_real_model(origInput, pestModel, realInput):
         with open(realInput, 'w') as f:
             json.dump(dat, f, indent=4, sort_keys=True)
 
-def goPESTpar():
-    import os
-    import sys
-
+def goPESTpar(argv=[]):
     userlistname = 'goPESTpar.list'
 
-    if len(sys.argv) not in [3,4]:
+    if len(argv) not in [3,4]:
         print('to generate PEST .pst sections and .tpl (for once): ')
-        print('     gopestpar origINPUT newPESTtpl')
+        print('     gopest par origINPUT newPESTtpl')
         print('to read PEST generated model file and create real INPUT for Tough2 (for each PEST forward run):')
-        print('     gopestpar origINPUT pestINPUT realINPUT')
+        print('     gopest par origINPUT pestINPUT realINPUT')
 
-    if len(sys.argv) == 3:
-        origInput = sys.argv[1]
-        tplToWrite = sys.argv[2]
+    if len(argv) == 3:
+        origInput = argv[1]
+        tplToWrite = argv[2]
         # write *param data lines to screen
         generate_params_and_tpl(origInput, tplToWrite, None)
 
-    if len(sys.argv) == 4:
-        origInput = sys.argv[1]
-        pestModel = sys.argv[2]
-        realInput = sys.argv[3]
+    if len(argv) == 4:
+        origInput = argv[1]
+        pestModel = argv[2]
+        realInput = argv[3]
 
         generate_real_model(origInput, pestModel, realInput)

@@ -182,7 +182,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
         copy2('pest_model.dat', master_dir + sep + 'pest_model.dat.' + get_slave_id())
         copy2('pest_model.obf', master_dir + sep + 'pest_model.obf.' + get_slave_id())
 
-def main_cli():
+def main_cli(argv=[]):
     obsreref = False
     svda = False
     testup = False
@@ -196,30 +196,30 @@ def main_cli():
     
     print('pest_model.py running at ', os.getcwd())
     
-    if len(sys.argv) > 1:
-        if '--test-update' in sys.argv[1:]:
+    if len(argv) > 1:
+        if '--test-update' in argv[1:]:
             testup = True
-        if '--obsreref' in sys.argv[1:]:
+        if '--obsreref' in argv[1:]:
             obsreref = True
-        if '--svda' in sys.argv[1:]:
+        if '--svda' in argv[1:]:
             svda = True
-        if '--skip-run' in sys.argv[1:]:
+        if '--skip-run' in argv[1:]:
             skiprun = True
-        if '--use-obf' in sys.argv[1:]:
+        if '--use-obf' in argv[1:]:
             # requires existing pest_model.obf.use (PEST will remove
             # pest_model.obf, so use different name)
             useobf = True
-        if '--local' in sys.argv[1:]:
+        if '--local' in argv[1:]:
             local = True
-        if '--skip-pr' in sys.argv[1:]:
+        if '--skip-pr' in argv[1:]:
             # use this if only calibrate NS model.  real_model.listing will be
             # faked as real_model_pr.listing which goPESTobs reads from !!!
             skippr = True
-        if '--waiwera' in sys.argv[1:]:
+        if '--waiwera' in argv[1:]:
             # use waiwera to run the t2 model, t2data as input, waiwera h5 as output
             waiwera = True
             hdf5 = True
-        if '--hdf5' in sys.argv[1:]:
+        if '--hdf5' in argv[1:]:
             # use .h5 output file.  automatically forced to be on if waiwera == True
             hdf5 = True
     main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, waiwera)

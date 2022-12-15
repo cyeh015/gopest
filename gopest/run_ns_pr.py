@@ -395,13 +395,13 @@ def get_t2():
         line = f.readlines()[0].strip()
         return line
 
-def main_cli():
+def main_cli(argv=[]):
     skippr = False
     sav2inc = False
 
-    if len(sys.argv) > 1:
-        if '--skip-pr' in sys.argv[1:]:
+    if len(argv) > 1:
+        if '--skip-pr' in argv[1:]:
             skippr = True
-        if '--sav2inc' in sys.argv[1:]:
+        if '--sav2inc' in argv[1:]:
             sav2inc = True
     run_ns_pr(skippr, sav2inc, simulator=get_t2(), silent=True)

@@ -18,10 +18,6 @@ a.yeh@auckland.ac.nz
 June 2015
 """
 
-print(cfg['pest']['executable'])
-print(cfg['simulator']['executable'])
-print(str(cfg))
-
 PROJECT = cfg['nesi']['project']
 PROJECT_MAUI = cfg['nesi']['maui']['project']
 PROJECT_MAHUIKA = cfg['nesi']['mahuika']['project']
@@ -710,7 +706,7 @@ def proc_args():
         option['cancel'] = True
     return option
 
-def submit_cli():
+def submit_cli(argv=[]):
     from time import sleep
     # You can use chain jobs to create dependencies between jobs.
     # SLURM has an option -d or "--dependency" that allows to

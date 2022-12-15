@@ -90,7 +90,8 @@ def fix_pcf():
         print('update_case_pst.py unable to proceed, restoring.')
         os.rename(PST_BK, PST)
 
-def make_case_cli():
+def make_case_cli(argv=[]):
+    print('make_case_cli', argv)
     # runs goPEST to get par and obs entries
     print('+++ running goPEST to get par and obs')
     generate_params_and_tpl('real_model_original.dat', 'pest_model.tpl', 'pest_par_data')

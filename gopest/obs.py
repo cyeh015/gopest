@@ -230,25 +230,22 @@ def read_from_real_model(fgeo, fdat, flst, fobf, waiwera=False):
         f.write(line+'\n')
     f.close()
 
-def goPESTobs():
-
+def goPESTobs(argv=[]):
     START_TIME = time.time()
     #from config import *
-    import os
 
     userlistname = 'goPESTobs.list'
 
-    import sys
-    if len(sys.argv) not in [4,5]:
+    if len(argv) not in [4,5]:
         print('to generate PEST .pst observation section and .ins: ')
-        print('     goPESTobs.py geo dat newPESTins')
+        print('     gopest obs geo dat newPESTins')
         print('to read Tough2 results and write result file for PEST to read:')
-        print('     goPESTobs.py geo dat lst newPESTobf')
+        print('     gopest obs geo dat lst newPESTobf')
 
-    if len(sys.argv) == 4:
-        fgeo = sys.argv[1]
-        fdat = sys.argv[2]
-        insToWrite = sys.argv[3]
+    if len(argv) == 4:
+        fgeo = argv[1]
+        fdat = argv[2]
+        insToWrite = argv[3]
 
         fobses = 'pest_obs_data'
         fplts = 'goPESTobs.json'
@@ -256,12 +253,12 @@ def goPESTobs():
         generate_obses_and_ins(fgeo, fdat, insToWrite,
                                fobses, fplts, fcovs)
 
-    if len(sys.argv) == 5:
+    if len(argv) == 5:
         
-        fgeo = sys.argv[1]
-        fdat = sys.argv[2]
-        flst = sys.argv[3]
-        obfToWrite = sys.argv[4]
+        fgeo = argv[1]
+        fdat = argv[2]
+        flst = argv[3]
+        obfToWrite = argv[4]
 
         geo = mulgrid(fgeo)
         if fdat.lower().endswith('.json'):
