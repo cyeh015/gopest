@@ -6,9 +6,6 @@ import os
 import re
 import shutil
 
-PST_BK = './case.pst.backup'
-PST = './case.pst'
-
 def replace_section(begin_sec, end_sec, pcf_text, repl):
     """ returns PEST control file (passed in as a multiline string) with section
     between begin_sec and end_sec replaced by string repl.  It does not matter
@@ -54,15 +51,18 @@ def replace_nth_line(longstring, i, repl):
 #############################################################################
 
 def fix_pcf():
-    if not os.path.isfile(PST):
-        print('Error: %s does not exist.' % PST)
+    fpst = config['pest']['case-name'] + '.pst'
+    fpst_bk = fpst + '.pst.backup'
+
+    if not os.path.isfile(fpst):
+        print('Error: %s does not exist.' % fpst)
         exit(1)
-    if os.path.isfile(PST_BK):
-        os.remove(PST_BK)
-    os.rename(PST, PST_BK)
+    if os.path.isfile(fpst_bk):
+        os.remove(fpst_bk)
+    os.rename(fpst, fpst_bk)
 
     try:
-        fin = open(PST_BK,'rU')
+        fin = open(fpst_bk,'rU')
         pcf_text = fin.read()
         fin.close()
 
@@ -83,14 +83,14 @@ def fix_pcf():
             return ' '.join([str(n_par), str(n_obs)] + nums[2:])
         pcf_text = replace_nth_line(pcf_text, 4, replace_par_obs_cnts)
 
-        fout = open(PST, 'w')
+        fout = open(fpst, 'w')
         fout.write(pcf_text)
         fout.close()
-        print('+++ PEST case control file edited, original file saved as %s' % PST_BK)
+        print('+++ PEST case control file edited, original file saved as %s' % fpst_bk)
     except Exception as e:
         print(e)
         print('update_case_pst.py unable to proceed, restoring.')
-        os.rename(PST_BK, PST)
+        os.rename(fpst_bk, fpst)
 
 def copy_model_files():
     """ user specifies model's original files in [model.original]section

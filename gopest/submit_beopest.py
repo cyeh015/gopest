@@ -44,7 +44,7 @@ MEM_FORWARD = "4000"
 # 'waiwera-Mahuika': calling submit_beopest.py and use Mahuika
 SIMULATOR = cfg['simulator']['executable']
 
-PST_NAME = cfg['pest']['pst_name']
+PST_NAME = cfg['pest']['case-name']
 PESTDIR = cfg['pest']['dir']
 BEOPEST = cfg['pest']['executable']
 PORT = cfg['pest']['port']
@@ -108,7 +108,7 @@ ENV_MODULES_MAUI = cfg['nesi']['maui']['env_init']
 ENV_MODULES_MAHUIKA = cfg['nesi']['mahuika']['env_init']
 
 
-pst_name = cfg['pest']['pst_name']
+pst_name = cfg['pest']['case-name']
 
 slave_files = [pst_name + '.pst']
 slave_files += [

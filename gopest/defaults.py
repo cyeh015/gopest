@@ -7,7 +7,7 @@ port = "24001"
 num_slaves = 2
 slave_dirs = ""
 
-pst_name = 'case'
+case-name = 'case'
 switches = []
 # additional swiches for beopest, eg /s for restart, /p1 for parallise 1st model run
 # should not use /p1 with svda, no /p1 with obsreref_10 either
