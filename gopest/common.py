@@ -22,7 +22,9 @@ except FileNotFoundError:
     if 'y' in ans.lower():
         with open(ftoml, 'w') as f:
             f.write(default_cfg)
-        config = toml.loads(default_cfg)
+            print("Config file '%s' created, please review and re-run gopest." % ftoml)
+            print("Existing...")
+            exit(0)
     else:
         print('Existing...')
         exit(1)
