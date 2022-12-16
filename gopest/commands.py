@@ -20,6 +20,7 @@ xx  run              (run_beopest)
     obs              (goPESTobs)
     run-pest-model   (pest_model)
     run-ns-pr        (run_ns_pr)
+    save-iter-files  (rename_latest_files)
 
 Important files for goPEST to work:
     goPESTconfig.toml
@@ -47,6 +48,7 @@ def gopest_cli():
             import gopest.run_ns_pr
             import gopest.submit_beopest
             import gopest.make_case_pst
+            import gopest.rename_latest_files
             cmds = {
                 'par': gopest.par.goPESTpar,
                 'obs': gopest.obs.goPESTobs,
@@ -54,6 +56,7 @@ def gopest_cli():
                 'run-ns-pr': gopest.run_ns_pr.main_cli,
                 'submit': gopest.submit_beopest.submit_cli,
                 'init': gopest.make_case_pst.make_case_cli,
+                'save-iter-files': gopest.rename_latest_files.rename_latest_files,
             }
             if sys.argv[1] not in cmds:
                 print(version + hlp)

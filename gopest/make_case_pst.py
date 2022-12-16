@@ -50,10 +50,28 @@ def replace_nth_line(longstring, i, repl):
 
 #############################################################################
 
-def fix_pcf():
-    fpst = config['pest']['case-name'] + '.pst'
-    fpst_bk = fpst + '.pst.backup'
+def fixpcf_modelcmd(fpst):
+    """ update PEST case file (.pst) with model command line and distribution
+    files
+    """
+    input_typ = config['simulator']['input-type']
+    output_typ = config['simulator']['output-type']
+    sequence = config['model']['sequence']
+    if input_typ == 'aut2':
+        fsave = 'real_model_' + sequence[0] + '.save'
+        fincon = 'real_model_' + sequence[0] + '.incon'
+        fdatns = 'real_model_' + sequence[0] + '.dat'
+        if output_typ == 'h5':
+            flstpr = 'real_model_' + sequence[-1] + '.h5'
+        else:
+            flstpr = 'real_model_' + sequence[-1] + '.listing'
+    elif input_typ == 'waiwera':
+        fsave = 'real_model_' + sequence[0] + '.h5'
+        fincon = 'real_model_' + 'incon' + '.h5'
+        fdatns = 'real_model_' + sequence[0] + '.json'
+        flstpr = 'real_model_' + sequence[-1] + '.h5'
 
+    fpst_bk = fpst + '.backup'
     if not os.path.isfile(fpst):
         print('Error: %s does not exist.' % fpst)
         exit(1)
@@ -62,9 +80,52 @@ def fix_pcf():
     os.rename(fpst, fpst_bk)
 
     try:
-        fin = open(fpst_bk,'rU')
-        pcf_text = fin.read()
-        fin.close()
+        with open(fpst_bk,'r') as fin:
+            pcf_text = fin.read()
+
+        model_cmd = 'gopest run-pest-model\n'
+        model_inout = "\n".join([
+            'pest_model.tpl pest_model.dat',
+            'pest_model.ins  pest_model.obf',
+        ])
+        filedist = "\n".join([
+            '2 %s %s %s %s' % (fsave, fincon, fincon, fincon),
+            '1 %s %s.999' % (fincon, fincon),
+            '1 %s %s.999' % (fdatns, fdatns),
+            '1 %s %s.999' % (flstpr, flstpr),
+            '1 pest_model.dat pest_model.dat.999',
+            'command = "gopest save-iter-model"',
+        ])
+
+        pcf_text = replace_section("* model command line", "* model input/output",
+            pcf_text, model_cmd)
+        pcf_text = replace_section("* model input/output", "* prior information",
+            pcf_text, model_inout)
+        pcf_text = replace_section("* distribution files", "# end",
+            pcf_text, filedist)
+
+        with open(fpst, 'w') as fout:
+            fout.write(pcf_text)
+        print('+++ PEST case control file edited, original file saved as %s' % fpst_bk)
+    except Exception as e:
+        print(e)
+        print('update_case_pst.py unable to proceed, restoring.')
+        os.rename(fpst_bk, fpst)
+
+def fixpcf_parobs(fpst):
+    """ update PEST case file (.pst) with parameter and observation data
+    """
+    fpst_bk = fpst + '.backup'
+    if not os.path.isfile(fpst):
+        print('Error: %s does not exist.' % fpst)
+        exit(1)
+    if os.path.isfile(fpst_bk):
+        os.remove(fpst_bk)
+    os.rename(fpst, fpst_bk)
+
+    try:
+        with open(fpst_bk,'r') as fin:
+            pcf_text = fin.read()
 
         par_data, n_par = get_lines('.pest_par_data')
         obs_data, n_obs = get_lines('.pest_obs_data')
@@ -83,9 +144,8 @@ def fix_pcf():
             return ' '.join([str(n_par), str(n_obs)] + nums[2:])
         pcf_text = replace_nth_line(pcf_text, 4, replace_par_obs_cnts)
 
-        fout = open(fpst, 'w')
-        fout.write(pcf_text)
-        fout.close()
+        with open(fpst, 'w') as fout:
+            fout.write(pcf_text)
         print('+++ PEST case control file edited, original file saved as %s' % fpst_bk)
     except Exception as e:
         print(e)
@@ -148,7 +208,9 @@ def make_case_cli(argv=[]):
     # real_model_original_pr.dat model.
 
     # edit them into PEST case control file
-    fix_pcf()
+    fpst = config['pest']['case-name'] + '.pst'
+    fixpcf_parobs(fpst)
+    fixpcf_modelcmd(fpst)
 
 
 
