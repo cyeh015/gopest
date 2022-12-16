@@ -20,6 +20,21 @@ switches = []
 skip = false # skips actual simulation, existing model output is used
 skip-pr = false
 silent = true
+sequence = ['ns', 'pr']
+
+[model.original]
+# these original model files will be renamed to goPEST's internal convention,
+# which is usually something like real_model_xx, where xx is the sequence name.
+
+# specify at least Mulgrid geometry file here, needs .msh etc if running Waiwera
+geometry-files = ['raw/gOH68954.dat', 'raw/gOH68954.msh']
+incon-file = 'raw/NaturalState/waiOH68954_NS_486_incon.h5'
+ns-input-file = 'raw/NaturalState/waiOH68954_NS_486.json'
+pr-input-file = 'raw/Production/waiOH68954_PR_486.json'
+
+# optional original output file, useful for debug
+ns-output-file = 'raw/NaturalState/waiOH68954_NS_486.h5'
+pr-output-file = 'raw/Production/waiOH68954_PR_486.h5'
 
 [simulator]
 input-type = "waiwera" # "waiwera" or "aut2"
