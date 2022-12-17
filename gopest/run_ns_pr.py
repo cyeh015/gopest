@@ -242,20 +242,30 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         print(msg)
         return True
 
-    # change NS to PR
-    wai_pr = wai_ns
-    with open('gs_production.json', 'r') as f:
-        data = json.load(f)
-        wai_pr['source'] = wai_pr['source'] + data
-    with open('real_model_pr.output.json', 'r') as f:
-        data = json.load(f)
-        wai_pr['output'] = data
-    with open('real_model_pr.time.json', 'r') as f:
-        data = json.load(f)
-        wai_pr['time'] = data
+    with open(fdat[-1], 'r') as f:
+        wai_pr = json.load(f)
+    # update NS things into PR
+    ns_source = {s['name']:s for s in wai_ns['source']}
+    new_pr_source = []
+    for s in wai_pr['source']:
+        if s['name'] in ns_source:
+            new_pr_source.append(ns_source[s['name']])
+        else:
+            new_pr_source.append(s)
+    wao_pr['rock'] = wai_ns['rock']
+    # wai_pr = wai_ns
+    # with open('gs_production.json', 'r') as f:
+    #     data = json.load(f)
+    #     wai_pr['source'] = wai_pr['source'] + data
+    # with open('real_model_pr.output.json', 'r') as f:
+    #     data = json.load(f)
+    #     wai_pr['output'] = data
+    # with open('real_model_pr.time.json', 'r') as f:
+    #     data = json.load(f)
+    #     wai_pr['time'] = data
     # additional
+    # wai_pr['output']['frequency'] = 0
     wai_pr['output']['filename'] = flsts[-1]
-    wai_pr['output']['frequency'] = 0
     wai_pr["initial"] = {"filename": flsts[0], "index": inc_idx}
 
     json.dump(wai_pr, open(fdats[-1], 'w'), indent=2, sort_keys=True)
