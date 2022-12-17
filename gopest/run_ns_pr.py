@@ -542,6 +542,23 @@ def get_t2():
         line = f.readlines()[0].strip()
         return line
 
+def run_ns_pr():
+    """ call this from pest_model.py """
+    if config['simulator']['input-type'] == 'waiwera':
+        return run_ns_pr_waiwera(skippr=config['model']['skip-pr'],
+                                 sav2inc=True,
+                                 simulator=config['simulator']['executable'],
+                                 allow_failed_ns=True,
+                                 silent=True)
+    elif config['simulator']['input-type'] == 'aut2':
+        return run_ns_pr_aut2(skippr=config['model']['skip-pr'],
+                              sav2inc=False,
+                              simulator=config['simulator']['executable'],
+                              allow_failed_ns=True,
+                              silent=True)
+    else:
+        raise NotImplementedError('No implementation of run_ns_pr() for input-type: ' + config['simulator']['input-type'])
+
 def main_cli(argv=[]):
     skippr = config['model']['skip-pr']
     sav2inc = False

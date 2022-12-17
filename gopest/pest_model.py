@@ -151,15 +151,13 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
     else:
         START_TIME = time.time()
         print("--- run_ns_pr.py")
+        runok = run_ns_pr()
         if obsreref:
-            runok = run_ns_pr(skippr=skippr, save2inc=True, simulator=get_t2(), allow_failed_ns=False)
             if not local:
                 print("--- reset Master INCON")
                 copy2('real_model.incon', master_dir + sep + 'real_model.incon')
             else:
                 print("--- .save file written as .incon")
-        else:
-            runok = run_ns_pr(skippr=skippr, save2inc=True, simulator=get_t2(), allow_failed_ns=True)
         if sendbad:
             for f in glob.glob('bad_model_*'):
                 copy2(f, master_dir + sep + 'bad_model_slave' + get_slave_id() + '_' + f)

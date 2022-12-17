@@ -25,3 +25,6 @@ To get a list of supported COMMANDs, type `gopest help`.
 
 - in run_ns_pr, code shouldn't worry about nesi/cluster related things, maybe
   not running local vs nesi either
+
+- remove obsreref rekated things, use pest_hp now
+
