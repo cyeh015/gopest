@@ -558,9 +558,9 @@ def gen_run_single_slave(fname="_run_a_slave.sh"):
         "export PATH=./:$PATH",
         "echo Slave $(hostname)_${1} running command: %s" % cmd,
         # "sysctl fs.file-nr",
-        "chmod a+x model.bat",
-        "chmod a+x r_model.bat",
-        "chmod a+x d_model.bat",
+        # "chmod a+x model.bat",
+        # "chmod a+x r_model.bat",
+        # "chmod a+x d_model.bat",
         cmd,
         "",]
     if SUMMARY_LARGE_FILES:
