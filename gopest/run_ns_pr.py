@@ -285,7 +285,7 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         inc_h5 = h5py.File(flsts[-1], 'r')
         inc_idx = len(inc_h5['time'][:,0]) - 1
         if inc_idx < 0:
-            raise Exception("ERROR! output file '%s' has no data." 5 flsts[-1])
+            raise Exception("ERROR! output file '%s' has no data." % flsts[-1])
         endtime = inc_h5['time'][inc_idx, 0]
         inc_h5.close()
         if abs(endtime - wai_pr['time']['stop']) < 1.e3:
