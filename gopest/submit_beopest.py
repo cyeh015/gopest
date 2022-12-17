@@ -155,7 +155,7 @@ if "/hpstart" in cfg['pest']['switches']:
 if "/i" in cfg['pest']['switches']:
     master_files.append(pst_name + '.jco')
 
-master_files += runtime['filename']['master']
+master_files += cfg['files']['master']
 
 # All files needed in slave directory
 # TODO: should have both master_files and slave_files
