@@ -181,6 +181,8 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
     else:
         raise Exception("Error! Waiwera initial conditions file '%s' not found." % finc)
 
+    with open(fdats[0], 'r') as f:
+        wai_ns = json .load(f)
     # overwrite these just to be safe
     wai_ns["thermodynamics"] = {"name": "ifc67", "extrapolate": True}
     wai_ns["output"]["filename"] = flsts[0]
