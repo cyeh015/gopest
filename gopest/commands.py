@@ -19,7 +19,7 @@ xx  run              (run_beopest)
     par              (goPESTpar)
     obs              (goPESTobs)
     run-pest-model   (pest_model)
-    run-ns-pr        (run_ns_pr)
+    run-forward      (run_ns_pr)
     save-iter-files  (rename_latest_files)
 
 Important files for goPEST to work:
@@ -53,7 +53,7 @@ def gopest_cli():
                 'par': gopest.par.goPESTpar,
                 'obs': gopest.obs.goPESTobs,
                 'run-pest-model': gopest.pest_model.main_cli,
-                'run-ns-pr': gopest.run_ns_pr.main_cli,
+                'run-forward': gopest.run_ns_pr.main_cli,
                 'submit': gopest.submit_beopest.submit_cli,
                 'init': gopest.make_case_pst.make_case_cli,
                 'save-iter-files': gopest.rename_latest_files.rename_latest_files,
