@@ -242,7 +242,7 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         print(msg)
         return True
 
-    with open(fdat[-1], 'r') as f:
+    with open(fdats[-1], 'r') as f:
         wai_pr = json.load(f)
     # update NS things into PR
     ns_source = {s['name']:s for s in wai_ns['source']}
