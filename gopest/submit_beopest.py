@@ -659,6 +659,9 @@ def proc_args():
             "  -f3maui, --forward3maui COMMAND",
             "      This is the same as -f3/--forward3, but submit to Maui",
             "      instead.",
+            "  -f3x, --forward3x COMMAND",
+            "      This is the same as -f3/--forward3, but submission to",
+            "      Maui or Mahuika depends on settings in goPESTconfig.toml",
             "  --dirs DIR_PATTERNi --jobnowait COMMAND",
             "      Used to submit many jobs of COMMAND in directories specified",
             "      by DIR_PATTERN",
@@ -671,6 +674,7 @@ def proc_args():
         "forward3": None,
         "forward3mahuika": None,
         "forward3maui": None,
+        "forward3x": None,
         "dirs": None,
         "jobnowait": None,
         "cancel": False,
@@ -695,10 +699,15 @@ def proc_args():
         option['forward3mahuika'] = get_opt('--forward3mahuika')
     elif '-f3mahuika' in sys.argv[1:]:
         option['forward3mahuika'] = get_opt('-f3mahuika')
+
     elif '--forward3maui' in sys.argv[1:]:
         option['forward3maui'] = get_opt('--forward3maui')
     elif '-f3maui' in sys.argv[1:]:
         option['forward3maui'] = get_opt('-f3maui')
+    elif '--forward3x' in sys.argv[1:]:
+        option['forward3x'] = get_opt('--forward3x')
+    elif '-f3x' in sys.argv[1:]:
+        option['forward3x'] = get_opt('-f3x')
     elif '--dirs' in sys.argv[1:]:
         option['dirs'] = get_opt('--dirs')
         option['jobnowait'] = get_opt('--jobnowait')
@@ -774,6 +783,38 @@ def submit_cli(argv=[]):
             while os.path.isfile('_status_on_nesi'):
                 sleep(120)
             ttime = check_output("sacct -j %s.0 -o totalcpu -n" % jobid).strip()
+            print("\nForward job %s finished after %s" % (jobid, ttime))
+        else:
+            os.remove('_status_on_nesi')
+            print("\nFailed to submit _forward.sl")
+        exit()
+    elif option['forward3x'] is not None:
+        """ The is the same as -f/--forward, but use lock files instead of
+        swait or sbatch --wait, which replies on NeSI's communications.
+        """
+        if config['cluster_forward'] == 'mahuika':
+            cmd = config['nesi']['mahuika']['executable'] + ' ' + option['forward3x']
+            print('submit_beopest.py runs command (mahuika)' + cmd)
+            gen_forward_mahuika_sl(cmd)
+        elif config['cluster_forward'] == 'maui':
+            cmd = config['nesi']['maui']['executable'] + ' ' + option['forward3x']
+            print('submit_beopest.py runs command (maui)' + cmd)
+            gen_forward_maui_sl(cmd)
+        else:
+            raise Exception('only supports mahuika or maui')
+        # _status_on_nesi will be removed once the _forward.sl finish
+        # regardless how it terminated.
+        with open('_status_on_nesi', 'w') as f:
+            pass
+        import random
+        wait_t = random.random() # * 20.0 * 60.0
+        print('.. waiting %f sec before submit ..' % wait_t)
+        sleep(wait_t)
+        jobid = sbatch_check("sbatch _forward.sl", retry_sec=30, retry_limit=50)
+        if jobid is not None:
+            while os.path.isfile('_status_on_nesi'):
+                sleep(120)
+            ttime = check_output("sacct --clusters=mahuika -j %s.0 -o totalcpu -n" % jobid).strip()
             print("\nForward job %s finished after %s" % (jobid, ttime))
         else:
             os.remove('_status_on_nesi')

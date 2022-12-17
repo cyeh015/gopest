@@ -18,6 +18,9 @@ from t2incons import *
 
 from gopest.utils import gener_groups
 
+from gopest.common import config
+from gopest.common import runtime
+
 def tail(filename, n=10):
     """ Return the last n lines of a file """
     from collections import deque
@@ -152,7 +155,148 @@ def ensure_converge(ns, sav, allow_failed_ns=True):
             return False
     return sav
 
-def run_ns_pr(skippr=False, save2inc=False, simulator='waiwera-dkr',
+def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
+              allow_failed_ns=True, silent=True):
+    """
+    supported platforms:
+        'waiwera' - local native waiwera executable
+        'waiwera-dkr' - local waiwera running on docker
+        'waiwera-Maui' - NeSI Maui (uses submit_beopest.py)
+        'waiwera-Mahuika' - NeSI Mahuika (uses submit_beopest.py)
+    """
+    fgeo = runtime['filename']['geom']
+    fsav = runtime['filename']['save']
+    finc = runtime['filename']['incon']
+    fdato = runtime['filename']['dat_orig']
+    fdats = runtime['filename']['dat_seq']
+
+    if os.path.exists(finc):
+        # check incon
+        inc_h5 = h5py.File(finc, 'r')
+        inc_idx = len(inc_h5['time'][:,0]) - 1
+        if inc_idx < 0:
+            raise Exception("ERROR! Waiwera initial conditions file '%s' has no data." % finc)
+        inc_h5.close()
+        use_inc = '--' # use dummy in dat.json(), then replaced later
+    else:
+        raise Exception("Error! Waiwera initial conditions file '%s' not found." % finc)
+
+    # overwrite these just to be safe
+    wai_ns["thermodynamics"] = {"name": "ifc67", "extrapolate": True}
+    wai_ns["output"]["filename"] = flsts[0]
+    # wai_ns["output"]["frequency"] = 1000
+    # wai_ns["time"]["step"]["maximum"]["number"] = 80000
+    # wai_ns["time"]["stop"] = 0.5e14
+    wai_ns["mesh"]["filename"] = "g_real_model.msh"
+    if use_inc == '--':
+       wai_ns["initial"] = {"filename": fincon, "index": inc_idx}
+    if silent:
+        wai_ns["logfile"] = {"echo": False}
+    else:
+        wai_ns["logfile"] = {"echo": True}
+    json.dump(wai_ns, open(fdats[0], 'w'), indent=2, sort_keys=True)
+
+    # clean up
+    clean_files = [
+        flsts[0],
+        fdats[0].replace('.json', '.yaml'),
+    ]
+    for cf in clean_files:
+        try:
+            os.remove(cf)
+        except OSError:
+            pass
+
+    model_args = [fdats[0]] + config['simulator']['cmd-options']
+    if config['mode'] == 'local':
+        cmd = [config['executable']] + model_args
+    else:
+        cmd = ['gopest', 'submit', '--forward3x'] + ' '.join(model_args)
+
+    START_TIME = time.time()
+    print('NS launched on %s...' % config['mode'])
+    # run NS
+    print(cmd)
+    subprocess.call(cmd)
+
+    # check NS
+    if os.path.exists(flsts[0]):
+        inc_h5 = h5py.File(flsts[0], 'r')
+        inc_idx = len(inc_h5['time'][:,0]) - 1
+        if inc_idx < 0:
+            raise Exception("ERROR! output file '%s' has no data." % flsts[0])
+        endtime = inc_h5['time'][inc_idx, 0]
+        inc_h5.close()
+        if abs(endtime - wai_ns['time']['stop']) < 1.e3:
+            print('NS finished after %.1f seconds' % (time.time() - START_TIME))
+        else:
+            print('NS failed after %.1f seconds' % (time.time() - START_TIME))
+            if not allow_failed_ns:
+                return False
+
+    if skippr:
+        msg = 'Skipped PR, use NS result as PR for goPESTobs/pest_model'
+        print(msg)
+        return True
+
+    # change NS to PR
+    wai_pr = wai_ns
+    with open('gs_production.json', 'r') as f:
+        data = json.load(f)
+        wai_pr['source'] = wai_pr['source'] + data
+    with open('real_model_pr.output.json', 'r') as f:
+        data = json.load(f)
+        wai_pr['output'] = data
+    with open('real_model_pr.time.json', 'r') as f:
+        data = json.load(f)
+        wai_pr['time'] = data
+    # additional
+    wai_pr['output']['filename'] = flsts[-1]
+    wai_pr['output']['frequency'] = 0
+    wai_pr["initial"] = {"filename": flsts[0], "index": inc_idx}
+
+    json.dump(wai_pr, open(fdats[-1], 'w'), indent=2, sort_keys=True)
+
+    # clean up
+    clean_files = [
+        flsts[-1],
+        fdats[-1].replace('.json', '.yaml'),
+    ]
+    for cf in clean_files:
+        try:
+            os.remove(cf)
+        except OSError:
+            pass
+
+    model_args = [fdats[-1]] + config['simulator']['cmd-options']
+    if config['mode'] == 'local':
+        cmd = [config['executable']] + model_args
+    else:
+        cmd = ['gopest', 'submit', '--forward3x'] + ' '.join(model_args)
+
+    START_TIME = time.time()
+    print('PR launched on %s...' % simulator)
+    # run
+    print(cmd)
+    subprocess.call(cmd)
+
+    # check PR
+    if os.path.exists(flsts[-1]):
+        inc_h5 = h5py.File(flsts[-1], 'r')
+        inc_idx = len(inc_h5['time'][:,0]) - 1
+        if inc_idx < 0:
+            raise Exception("ERROR! output file '%s' has no data." 5 flsts[-1])
+        endtime = inc_h5['time'][inc_idx, 0]
+        inc_h5.close()
+        if abs(endtime - wai_pr['time']['stop']) < 1.e3:
+            print('PR finished after %.1f seconds' % (time.time() - START_TIME))
+        else:
+            print('PR failed after %.1f seconds' % (time.time() - START_TIME))
+            if not allow_failed_ns:
+                return False
+    return True
+
+def run_ns_pr_mixed(skippr=False, sav2inc=False, simulator='waiwera-dkr',
               allow_failed_ns=True, silent=True):
     """ convert aut2 model into waiwera, and run ns/pr
 
@@ -333,7 +477,7 @@ def run_ns_pr(skippr=False, save2inc=False, simulator='waiwera-dkr',
     t2_ns.write('real_model_pr.dat', echo_extra_precision=True)
     return True
 
-def run_ns_pr_aut2(skippr=False, save2inc=False, simulator='AUTOUGH2_3D',
+def run_ns_pr_aut2(skippr=False, sav2inc=False, simulator='AUTOUGH2_3D',
                    allow_failed_ns=True, silent=True):
     geo = mulgrid("g_real_model.dat")
     inc = t2incon("real_model.incon")
@@ -351,7 +495,7 @@ def run_ns_pr_aut2(skippr=False, save2inc=False, simulator='AUTOUGH2_3D',
     print('NS finished after ', (time.time() - START_TIME), 'seconds')
     if sav is False:
         return False
-    if save2inc:
+    if sav2inc:
         sav.write("real_model.incon", reset=True)
 
     if skippr:
@@ -399,7 +543,7 @@ def get_t2():
         return line
 
 def main_cli(argv=[]):
-    skippr = False
+    skippr = config['model']['skip-pr']
     sav2inc = False
 
     if len(argv) > 1:
@@ -407,4 +551,10 @@ def main_cli(argv=[]):
             skippr = True
         if '--sav2inc' in argv[1:]:
             sav2inc = True
-    run_ns_pr(skippr, sav2inc, simulator=get_t2(), silent=True)
+
+    if config['simulator']['input-type'] == 'waiwera':
+        run_ns_pr_waiwera(skippr, sav2inc, simulator=get_t2(), silent=True)
+    else:
+        run_ns_pr_aut2(skippr=False, sav2inc=False,
+                       simulator=config['simulator']['executable'],
+                       allow_failed_ns=True, silent=True)

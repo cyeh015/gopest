@@ -19,3 +19,9 @@ The main CLI script `gopest` is to be followed by COMMAND and associated argumen
 To get a list of supported COMMANDs, type `gopest help`.
 
 
+## TODO
+
+- user run_ns_pr script? generalised model sequence runner?
+
+- in run_ns_pr, code shouldn't worry about nesi/cluster related things, maybe
+  not running local vs nesi either

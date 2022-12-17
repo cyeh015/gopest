@@ -42,6 +42,9 @@ output-type = "h5" # "listing" or "h5", will always be "h5" if input-type = "wai
 
 executable = 'waiwera'
 
+# these will be attached to the end of simulation command (useful for waiwera)
+cmd-options = []
+
 [nesi]
 project = "uoa00123"
 cluster_master = "mahuika"

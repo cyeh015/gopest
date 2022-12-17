@@ -110,7 +110,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
     ### goPESTpar
     if not skiprun:
         print("--- goPESTpar")
-        generate_real_model(fdato, 'pest_model.dat', fdatns)
+        generate_real_model(fdato, 'pest_model.dat', fdats[0])
         # sleep(30)  # just in case shared file system slow
 
     if obsreref:
