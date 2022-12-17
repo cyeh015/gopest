@@ -269,7 +269,7 @@ def check_output_old(cmd):
     return "".join(out)
 
 def check_output(cmd):
-    return subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    return subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True).decode()
 
 def write_to(filename, line):
     with open(filename, 'w') as f:
