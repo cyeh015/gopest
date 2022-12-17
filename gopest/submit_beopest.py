@@ -716,7 +716,7 @@ def proc_args():
     return option
 
 def submit_cli(argv=[]):
-    if config['mode'] != 'nesi':
+    if cfg['mode'] != 'nesi':
         raise Exception('Error! gopest submit can only run with mode = "nesi" ')
 
     from time import sleep
@@ -795,12 +795,12 @@ def submit_cli(argv=[]):
         """ The is the same as -f/--forward, but use lock files instead of
         swait or sbatch --wait, which replies on NeSI's communications.
         """
-        if config['cluster_forward'] == 'mahuika':
-            cmd = config['nesi']['mahuika']['executable'] + ' ' + option['forward3x']
+        if cfg['cluster_forward'] == 'mahuika':
+            cmd = cfg['nesi']['mahuika']['executable'] + ' ' + option['forward3x']
             print('submit_beopest.py runs command (mahuika)' + cmd)
             gen_forward_mahuika_sl(cmd)
-        elif config['cluster_forward'] == 'maui':
-            cmd = config['nesi']['maui']['executable'] + ' ' + option['forward3x']
+        elif cfg['cluster_forward'] == 'maui':
+            cmd = cfg['nesi']['maui']['executable'] + ' ' + option['forward3x']
             print('submit_beopest.py runs command (maui)' + cmd)
             gen_forward_maui_sl(cmd)
         else:
