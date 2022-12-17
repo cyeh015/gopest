@@ -122,7 +122,7 @@ ENV_MODULES_MAHUIKA = cfg['nesi']['mahuika']['env_init']
 
 
 pst_name = cfg['pest']['case-name']
-slave_files += [
+slave_files = [
     pst_name + '.pst',
     # communication files:
     "_input",
