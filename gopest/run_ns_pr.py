@@ -192,7 +192,7 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
     # wai_ns["time"]["stop"] = 0.5e14
     wai_ns["mesh"]["filename"] = "g_real_model.msh"
     if use_inc == '--':
-       wai_ns["initial"] = {"filename": fincon, "index": inc_idx}
+       wai_ns["initial"] = {"filename": finc, "index": inc_idx}
     if silent:
         wai_ns["logfile"] = {"echo": False}
     else:
