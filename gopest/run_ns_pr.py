@@ -212,7 +212,7 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
 
     model_args = [fdats[0]] + config['simulator']['cmd-options']
     if config['mode'] == 'local':
-        cmd = [config['executable']] + model_args
+        cmd = [config['simulator']['executable']] + model_args
     else:
         cmd = ['gopest', 'submit', '--forward3x'] + ' '.join(model_args)
 
