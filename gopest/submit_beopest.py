@@ -716,6 +716,9 @@ def proc_args():
     return option
 
 def submit_cli(argv=[]):
+    if config['mode'] != 'nesi':
+        raise Exception('Error! gopest submit can only run with mode = "nesi" ')
+
     from time import sleep
     # You can use chain jobs to create dependencies between jobs.
     # SLURM has an option -d or "--dependency" that allows to
