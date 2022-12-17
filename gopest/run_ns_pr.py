@@ -169,6 +169,7 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
     finc = runtime['filename']['incon']
     fdato = runtime['filename']['dat_orig']
     fdats = runtime['filename']['dat_seq']
+    flsts = runtime['filename']['lst_seq']
 
     if os.path.exists(finc):
         # check incon
