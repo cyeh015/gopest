@@ -4,6 +4,7 @@ import os
 import subprocess
 
 from gopest.common import config as cfg
+from gopest.common import runtime
 
 """
 Run this script to submit BeoPEST jobs on NeSI using Slurm.  This includes
@@ -91,11 +92,15 @@ if PESTDIR:
 
 # list NeSI modules that needs to load for running scripts/AUTOUGH2 etc.
 ENV_MODULES = [
-    # "module GCC/4.9.2",
-    # "module Python/2.7.11-foss-2015a",
-    "module load gimkl/2017a",
-    "module load GCC/7.1.0",
-    "module load Python-Geo/2.7.14-gimkl-2017a",
+    'module load gimkl/2018b',
+    'module load Python-Geo/3.7.3-gimkl-2018b',
+    'source /nesi/project/uoa00124/env-py3-gopest/bin/activate',
+    # 18/12/2022 3:34:08 a.m.
+    # # "module GCC/4.9.2",
+    # # "module Python/2.7.11-foss-2015a",
+    # "module load gimkl/2017a",
+    # "module load GCC/7.1.0",
+    # "module load Python-Geo/2.7.14-gimkl-2017a",
 ]
 # user can load these modules by command 'source _load_modules.sh'
 with open('_load_modules.sh', 'w') as f:
@@ -107,60 +112,50 @@ with open('_load_modules.sh', 'w') as f:
 ENV_MODULES_MAUI = cfg['nesi']['maui']['env_init']
 ENV_MODULES_MAHUIKA = cfg['nesi']['mahuika']['env_init']
 
+# communication files:
+# pest files
+# goPEST*
+# pest_model*
+# real_model*       (from gopest.common.runtime)
+# data_*            (from toml)
+# gs_*              (from toml)
+
 
 pst_name = cfg['pest']['case-name']
-
-slave_files = [pst_name + '.pst']
 slave_files += [
+    pst_name + '.pst',
     # communication files:
     "_input",
     "_pest_dir",
     "_tough2",
     "_logfile",
     "_master_out",
-    "model.bat",
-    "r_model.bat",
-    "d_model.bat",
-    "svdabatch.bat",
-    "r_svdabatch.bat",
-    "d_svdabatch.bat",
+    # goPEST working files
     "pest_model.ins",
     "pest_model.tpl",
+    "goPESTconfig.toml",
     "goPESTpar.list",
     "goPESTobs.list",
-    # forward run files
-    "g_real_model.dat",
-    "g_real_model.msh",
-    "real_model_original.json",
-    "real_model_original.dat",
-    "real_model_original.pdat",
-    "real_model_original_pr.dat",
-    "real_model_original_pr.pdat",
-    "real_model_pr.h5",
-    "real_model_pr.listing",
-    "real_model.dat",
-    "real_model.h5",
-    "real_model.incon",
-    "real_model.incon.h5",
-    # goPEST data files
-    "data_co2_ratio.json",
-    "data_enth_hist.json",
-    "data_pressu_hist.json",
-    "data_temp_downhole.json",
-    "data_temp_downhole_pr_hist.json",
-    "data_well_geners_boiling.json",
-    "data_well_geners.json",
-    # required by run_ns_pr
-    "gs_production.json",
-    "real_model_pr.output.json",
-    "real_model_pr.time.json",
 ]
+# forward run files -> generated from toml
+slave_files += [
+    runtime['filename']['save'],
+    runtime['filename']['incon'],
+    runtime['filename']['dat_orig'],
+]
+slave_files += runtime['filename']['all_geoms']
+slave_files += runtime['filename']['fdats']
+slave_files += runtime['filename']['flsts']
+# user files -> copied from toml
+slave_files += runtime['filename']['files']['slave']
 
 master_files = slave_files
 if "/hpstart" in cfg['pest']['switches']:
     master_files.append(pst_name + '.hp')
 if "/i" in cfg['pest']['switches']:
     master_files.append(pst_name + '.jco')
+
+master_files += runtime['filename']['master']
 
 # All files needed in slave directory
 # TODO: should have both master_files and slave_files

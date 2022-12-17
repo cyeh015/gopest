@@ -39,6 +39,8 @@ except FileNotFoundError:
 runtime = {}
 def runtime_filenames(check=True):
     """ work out filenames for all internal model files """
+    def getext(fn): return os.path.splitext(fn)[1].lower()
+    all_geoms = ['g_real_model' + getext(f) for f in config['model']['original']['geometry-files']]
     input_typ = config['simulator']['input-type']
     output_typ = config['simulator']['output-type']
     sequence = config['model']['sequence']
@@ -58,10 +60,13 @@ def runtime_filenames(check=True):
         fdats = ['real_model_' + seq + '.json' for seq in sequence]
         flsts = ['real_model_' + seq + '.h5' for seq in sequence]
     filenames = {
+        # single string properties
         'geom': 'g_real_model.dat',
         'save': fsave,
         'incon': fincon,
         'dat_orig': fdato,
+        # following peoperties are lists
+        'all_geoms': all_geoms,
         'dat_seq': fdats,
         'lst_seq': flsts,
     }
