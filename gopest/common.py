@@ -1,3 +1,4 @@
+import os.path
 import toml
 import string
 
@@ -6,6 +7,7 @@ from functools import reduce  # forward compatibility for Python 3
 import operator
 
 from gopest.defaults import default_cfg
+
 
 """ this allows gopest.common.config to be used directly, eg.
         from gopest.common import config as cfg
@@ -28,6 +30,50 @@ except FileNotFoundError:
     else:
         print('Existing...')
         exit(1)
+
+""" this allows gopest.common.runtime to be used directly, eg.
+        from gopest.common import runtime
+        print(runtime['filename']['fincon'])
+        print(runtime['filename']['fdatns'])
+"""
+runtime = {}
+def runtime_filenames(check=True):
+    """ work out filenames for all internal model files """
+    input_typ = config['simulator']['input-type']
+    output_typ = config['simulator']['output-type']
+    sequence = config['model']['sequence']
+    if input_typ == 'aut2':
+        fsave = 'real_model_' + sequence[0] + '.save'
+        fincon = 'real_model_' + 'incon' + '.incon'
+        fdato = 'real_model_' + 'original' + '.dat'
+        fdats = ['real_model_' + seq + '.dat' for seq in sequence]
+        if output_typ == 'h5':
+            flsts = ['real_model_' + seq + '.h5' for seq in sequence]
+        else:
+            flsts = ['real_model_' + seq + '.listing' for seq in sequence]
+    elif input_typ == 'waiwera':
+        fsave = 'real_model_' + sequence[0] + '.h5'
+        fincon = 'real_model_' + 'incon' + '.h5'
+        fdato = 'real_model_' + 'original' + '.json'
+        fdats = ['real_model_' + seq + '.json' for seq in sequence]
+        flsts = ['real_model_' + seq + '.h5' for seq in sequence]
+    filenames = {
+        'geom': 'g_real_model.dat',
+        'save': fsave,
+        'incon': fincon,
+        'dat_orig': fdato,
+        'dat_seq': fdats,
+        'lst_seq': flsts,
+    }
+    if check:
+        for k,fnames in filenames.items():
+            if not isinstance(fnames, list):
+                fnames = [fnames]
+            for fn in fnames:
+                if not os.path.exists(fn):
+                    raise Exception('Cannot find file %s in the working dir.' % fn)
+    return filenames
+runtime['filename'] = runtime_filenames()
 
 ########## utility classes and functions
 class TwoWayDict(dict):

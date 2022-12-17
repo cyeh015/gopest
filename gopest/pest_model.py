@@ -30,6 +30,9 @@ from gopest.run_ns_pr import run_ns_pr
 from gopest.par import generate_real_model
 from gopest.obs import read_from_real_model
 
+from gopest.common import config
+from gopest.common import runtime
+
 def get_master_dir():
     with open('_master_dir', 'r') as f:
         line = f.readlines()[0].strip()
@@ -68,6 +71,13 @@ def par_match(pf1, pf2):
     return matched
 
 def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, waiwera):
+    fgeo = runtime['filename']['geom']
+    fsave = runtime['filename']['save']
+    fincon = runtime['filename']['incon']
+    fdato = runtime['filename']['dat_orig']
+    fdats = runtime['filename']['dat_seq']
+    flsts = runtime['filename']['lst_seq']
+
     print("----- Running " + " ".join(sys.argv[1:]))
     if local:
         master_dir = '.'
@@ -79,6 +89,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
 
     ### skips everything if use obf directly
     if useobf:
+        raise Exception('Should use pest_hp file distribution 17/12/2022')
         if path.isfile('pest_model.obf.use'):
             copy2(master_dir + sep + 'pest_model.obf.use', 'pest_model.obf')
             print("Found pest_model.obf.use , skips everything.")
@@ -99,7 +110,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
     ### goPESTpar
     if not skiprun:
         print("--- goPESTpar")
-        generate_real_model('real_model_original.dat', 'pest_model.dat', 'real_model.dat')
+        generate_real_model(fdato, 'pest_model.dat', fdatns)
         # sleep(30)  # just in case shared file system slow
 
     if obsreref:
@@ -110,7 +121,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
             if par_match(parf, 'pest_model.dat'):
                 matchname = path.splitext(parf)[1]
                 print("--- found matched incon/pars %s from master dir, overwrite Master INCON" % matchname)
-                copy2(master_dir + sep + 'real_model.incon' + matchname, master_dir + sep + 'real_model.incon')
+                copy2(master_dir + sep + fincon + matchname, master_dir + sep + fincon)
                 copy2(master_dir + sep + 'pest_model.obf' + matchname, 'pest_model.obf')
                 break
         # print("--- remove all pairs from labmda tests after searching")
@@ -129,7 +140,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
     if not local:
         print("--- use master INCON")
         try:
-            copy2(master_dir + sep + 'real_model.incon', 'real_model.incon')
+            copy2(master_dir + sep + fincon, fincon)
         except Error as e:
             # OK if src and dst are the same file, simply skip.
             print(e)
@@ -160,25 +171,11 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
     ### goPESTobs
     # sleep(30)  # just in case shared file system slow
     print("--- goPESTobs")
-    if skippr:
-        print('--- skip PR, use NS result')
-        if waiwera:
-            read_from_real_model('g_real_model.dat', 'real_model.json', 'real_model.h5', 'pest_model.obf', waiwera=waiwera)
-        elif hdf5:
-            read_from_real_model('g_real_model.dat', 'real_model.dat', 'real_model.h5', 'pest_model.obf', waiwera=waiwera)
-        else:
-            read_from_real_model('g_real_model.dat', 'real_model.dat', 'real_model.listing', 'pest_model.obf', waiwera=waiwera)
-    else:
-        if waiwera:
-            read_from_real_model('g_real_model.dat', 'real_model_pr.json', 'real_model_pr.h5', 'pest_model.obf', waiwera=waiwera)
-        elif hdf5:
-            read_from_real_model('g_real_model.dat', 'real_model_pr.dat', 'real_model_pr.h5', 'pest_model.obf', waiwera=waiwera)
-        else:
-            read_from_real_model('g_real_model.dat', 'real_model_pr.dat', 'real_model_pr.listing', 'pest_model.obf', waiwera=waiwera)
+    read_from_real_model(fgeo, fdats[-1], flsts[-1], 'pest_model.obf', waiwera=waiwera)
 
     if testup:
         print("--- store lambda test (save,obf,pars) pair:" + get_slave_id())
-        copy2('real_model.save', master_dir + sep + 'real_model.incon.' + get_slave_id())
+        copy2(fsave, master_dir + sep + fincon + '.' + get_slave_id())
         copy2('pest_model.dat', master_dir + sep + 'pest_model.dat.' + get_slave_id())
         copy2('pest_model.obf', master_dir + sep + 'pest_model.obf.' + get_slave_id())
 
@@ -193,7 +190,21 @@ def main_cli(argv=[]):
     skippr = False
     waiwera = False
     hdf5 = False
+
+    if config['simulator']['output-type'] == 'h5':
+        hdf5 = True
+    else:
+        hdf5 = False
     
+    if config['simulator']['input-type'] == 'waiwera':
+        waiwera = True
+        hdf5 = True
+    else:
+        waiwera = False
+
+    skiprun = config['model']['skip']
+    skippr = config['model']['skip-pr']
+
     print('pest_model.py running at ', os.getcwd())
     
     if len(argv) > 1:
@@ -203,23 +214,10 @@ def main_cli(argv=[]):
             obsreref = True
         if '--svda' in argv[1:]:
             svda = True
-        if '--skip-run' in argv[1:]:
-            skiprun = True
         if '--use-obf' in argv[1:]:
             # requires existing pest_model.obf.use (PEST will remove
             # pest_model.obf, so use different name)
             useobf = True
         if '--local' in argv[1:]:
             local = True
-        if '--skip-pr' in argv[1:]:
-            # use this if only calibrate NS model.  real_model.listing will be
-            # faked as real_model_pr.listing which goPESTobs reads from !!!
-            skippr = True
-        if '--waiwera' in argv[1:]:
-            # use waiwera to run the t2 model, t2data as input, waiwera h5 as output
-            waiwera = True
-            hdf5 = True
-        if '--hdf5' in argv[1:]:
-            # use .h5 output file.  automatically forced to be on if waiwera == True
-            hdf5 = True
     main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, waiwera)

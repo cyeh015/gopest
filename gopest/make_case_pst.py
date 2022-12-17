@@ -1,6 +1,8 @@
 from gopest.par import generate_params_and_tpl
 from gopest.obs import generate_obses_and_ins
+
 from gopest.common import config
+from gopest.common import runtime
 
 import os
 import re
@@ -54,22 +56,10 @@ def fixpcf_modelcmd(fpst):
     """ update PEST case file (.pst) with model command line and distribution
     files
     """
-    input_typ = config['simulator']['input-type']
-    output_typ = config['simulator']['output-type']
-    sequence = config['model']['sequence']
-    if input_typ == 'aut2':
-        fsave = 'real_model_' + sequence[0] + '.save'
-        fincon = 'real_model_' + sequence[0] + '.incon'
-        fdatns = 'real_model_' + sequence[0] + '.dat'
-        if output_typ == 'h5':
-            flstpr = 'real_model_' + sequence[-1] + '.h5'
-        else:
-            flstpr = 'real_model_' + sequence[-1] + '.listing'
-    elif input_typ == 'waiwera':
-        fsave = 'real_model_' + sequence[0] + '.h5'
-        fincon = 'real_model_' + 'incon' + '.h5'
-        fdatns = 'real_model_' + sequence[0] + '.json'
-        flstpr = 'real_model_' + sequence[-1] + '.h5'
+    fsave = runtime['filename']['save']
+    fincon = runtime['filename']['incon']
+    fdatns = runtime['filename']['dat_seq'][0]
+    flstpr = runtime['filename']['lst_seq'][-1]
 
     fpst_bk = fpst + '.backup'
     if not os.path.isfile(fpst):
@@ -158,6 +148,7 @@ def copy_model_files():
     naming convention.
     """
     def copy_to_cwd(filename, newbase):
+        """ copy to working dir and rename, but keeping all extention (to lower case) """
         newname = newbase + os.path.splitext(filename)[1].lower()
         print("  copy '%s' -> '%s'" % (filename, newname))
         shutil.copy2(filename, newname)
@@ -172,34 +163,26 @@ def copy_model_files():
         copy_to_cwd(config['model']['original']['%s-input-file' % seq], './real_model_%s' % seq)
         if '%s-output-file' % seq in config['model']['original']:
             copy_to_cwd(config['model']['original']['%s-output-file' % seq], './real_model_%s' % seq)
+    # make a copy of first dat to keep as original (handy for goPESTpar etc)
+    copy_to_cwd(config['model']['original']['%s-input-file' % sequence[0]], './real_model_original')
 
 def make_case_cli(argv=[]):
     """ runs goPEST to set up par and obs entries """
     print('make_case_cli', argv)
-    in_typ = config['simulator']['input-type']
-    out_typ = config['simulator']['output-type']
 
     print('+++ copy from original model files')
     copy_model_files()
 
     print('+++ running goPEST to get par and obs')
-    sequence = config['model']['sequence']
+    fgeo = runtime['filename']['geom']
+    fdato = runtime['filename']['dat_orig']
+    fdats = runtime['filename']['dat_seq']
 
-    fdat_first = {
-        'waiwera': 'real_model_%s.json' % sequence[0],
-        'aut2': 'real_model_%s.dat' % sequence[0],
-    }[in_typ]
+    print('  gopestpar', fdato, 'pest_model.tpl', '.pest_par_data')
+    generate_params_and_tpl(fdato, 'pest_model.tpl', '.pest_par_data')
 
-    fdat_final = {
-        'waiwera': 'real_model_%s.json' % sequence[-1],
-        'aut2': 'real_model_%s.dat' % sequence[-1],
-    }[in_typ]
-
-    print('  gopestpar', fdat_first, 'pest_model.tpl', '.pest_par_data')
-    generate_params_and_tpl(fdat_first, 'pest_model.tpl', '.pest_par_data')
-
-    print('  gopestobs', 'g_real_model.dat', fdat_final, 'pest_model.ins', '.pest_obs_data')
-    generate_obses_and_ins('g_real_model.dat', fdat_final, 'pest_model.ins', '.pest_obs_data')
+    print('  gopestobs', fgeo, fdats[-1], 'pest_model.ins', '.pest_obs_data')
+    generate_obses_and_ins(fgeo, fdats[-1], 'pest_model.ins', '.pest_obs_data')
 
     # unfortunately I need to use 'real_model_original_pr.dat' here because it
     # has many GENERs that may not exist in natural state, while still being
