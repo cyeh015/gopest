@@ -286,7 +286,7 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
     if config['mode'] == 'local':
         cmd = [config['executable']] + model_args
     else:
-        cmd = ['gopest', 'submit', '--forward3x'] + ' '.join(model_args)
+        cmd = ['gopest', 'submit', '--forward3x', ' '.join(model_args)]
 
     START_TIME = time.time()
     print('PR launched on %s...' % simulator)
