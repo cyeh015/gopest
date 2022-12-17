@@ -266,8 +266,16 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
     #     wai_pr['time'] = data
     # additional
     # wai_pr['output']['frequency'] = 0
+    wai_ns["thermodynamics"] = {"name": "ifc67", "extrapolate": True}
     wai_pr['output']['filename'] = flsts[-1]
     wai_pr["initial"] = {"filename": flsts[0], "index": inc_idx}
+    wai_ns["mesh"]["filename"] = "g_real_model.msh"
+    if silent:
+        wai_ns["logfile"] = {"echo": False}
+    else:
+        wai_ns["logfile"] = {"echo": True}
+
+
 
     json.dump(wai_pr, open(fdats[-1], 'w'), indent=2, sort_keys=True)
 
