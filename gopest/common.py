@@ -37,7 +37,7 @@ except FileNotFoundError:
         print(runtime['filename']['fdatns'])
 """
 runtime = {}
-def runtime_filenames(check=True):
+def runtime_filenames(check=False):
     """ work out filenames for all internal model files """
     def getext(fn): return os.path.splitext(fn)[1].lower()
     all_geoms = ['g_real_model' + getext(f) for f in config['model']['original']['geometry-files']]
