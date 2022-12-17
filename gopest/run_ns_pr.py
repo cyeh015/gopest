@@ -252,7 +252,8 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
             new_pr_source.append(ns_source[s['name']])
         else:
             new_pr_source.append(s)
-    wao_pr['rock'] = wai_ns['rock']
+    wai_pr['source'] = new_pr_source
+    wai_pr['rock'] = wai_ns['rock']
     # wai_pr = wai_ns
     # with open('gs_production.json', 'r') as f:
     #     data = json.load(f)
