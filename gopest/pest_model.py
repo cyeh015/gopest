@@ -34,7 +34,7 @@ from gopest.common import config
 from gopest.common import runtime
 
 def get_master_dir():
-    if config['mode'] != 'local'::
+    if config['mode'] != 'local':
         with open('_master_dir', 'r') as f:
             line = f.readlines()[0].strip()
             return line
