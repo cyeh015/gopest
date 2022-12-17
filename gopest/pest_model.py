@@ -184,7 +184,6 @@ def main_cli(argv=[]):
     testup = False
     skiprun = False
     useobf = False
-    local = False
     sendbad = True
     skippr = False
     waiwera = False
@@ -201,6 +200,7 @@ def main_cli(argv=[]):
     else:
         waiwera = False
 
+    local = config['mode'] == 'local'
     skiprun = config['model']['skip']
     skippr = config['model']['skip-pr']
 
