@@ -136,6 +136,8 @@ slave_files = [
     "goPESTconfig.toml",
     "goPESTpar.list",
     "goPESTobs.list",
+    # user supplied function, may not exist
+    "goPESTuser.py",
 ]
 # forward run files -> generated from toml
 slave_files += [
