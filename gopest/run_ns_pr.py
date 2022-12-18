@@ -173,10 +173,10 @@ def run_user_pre(seq):
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
         spec.loader.exec_module(module)
-        func = None
-        for n,f in inspect.getmembers(module, inspect.isfunction):
-            if n == 'pre_' + seq:
-                print('Calling user function %s() in %s' % (n, file_path))
+        for name,func in inspect.getmembers(module, inspect.isfunction):
+            print('%s has user func: %s()' % (file_path, name))
+            if name == 'pre_' + seq:
+                print('  -> calling %s() ...' % name)
                 func()
 
 def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
