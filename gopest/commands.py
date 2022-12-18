@@ -13,14 +13,14 @@ Usage: gopest COMMAND [ARGUMENTS]
 
 Supported COMMANDs:
     help
-    init             (make_case_pst)
-    submit           (submit_beopest)
-xx  run              (run_beopest)
-    par              (goPESTpar)
-    obs              (goPESTobs)
-    run-pest-model   (pest_model)
-    run-forward      (run_ns_pr)
-    save-iter-files  (rename_latest_files)
+    init [--no-copy]               (make_case_pst)
+    submit                         (submit_beopest)
+xx  run                            (run_beopest)
+    par                            (goPESTpar)
+    obs                            (goPESTobs)
+    run-pest-model                 (pest_model)
+    run-forward                    (run_ns_pr)
+    save-iter-files                (rename_latest_files)
 
 Important files for goPEST to work:
     goPESTconfig.toml

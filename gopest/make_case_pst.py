@@ -168,10 +168,14 @@ def copy_model_files():
 
 def make_case_cli(argv=[]):
     """ runs goPEST to set up par and obs entries """
-    print('make_case_cli', argv)
-
-    print('+++ copy from original model files')
-    copy_model_files()
+    for a in argv[1:]:
+        if a not in ['--no-copy']:
+            raise Exception('Unrecognised option "%s".' % a)
+    if '--no-copy' in argv:
+        print('+++ use existing model files')
+    else:
+        print('+++ copy from original model files')
+        copy_model_files()
 
     print('+++ running goPEST to get par and obs')
     fgeo = runtime['filename']['geom']
