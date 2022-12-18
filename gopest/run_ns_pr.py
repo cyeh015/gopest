@@ -277,11 +277,17 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         co2_ratio = json.load(f)
     for s in wai_pr['source']:
         if s['name'] in co2_ratio:
-            s['rate']= co2_ratio[s['name']] * upflow_rates[s['name'][:3]]
+            if s['name'][:3] in upflow_rates:
+                s['rate']= co2_ratio[s['name']] * upflow_rates[s['name'][:3]]
+            else:
+                print('warning source %s rate not set, cannot find source %s77' % (s['name'], s['name'][:3]))
     # fix ' 3' upflow recharge coeff, constant 1.0e-7
     for s in wai_pr['source']:
         if s['name'].endswith(' 3') and s['name'][0] not in ['P', 'R']:
-            s['recharge']['coefficient'] = 1.0e-7 * upflow_rates[s['name'][:3]]
+            if s['name'][:3] in upflow_rates:
+                s['recharge']['coefficient'] = 1.0e-7 * upflow_rates[s['name'][:3]]
+            else:
+                print('warning source %s recharge.coefficient not set, cannot find source %s77' % (s['name'], s['name'][:3]))
     # other misc things
     wai_pr["thermodynamics"] = {"name": "ifc67", "extrapolate": True}
     wai_pr['output']['filename'] = flsts[-1]
