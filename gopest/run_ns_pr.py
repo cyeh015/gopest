@@ -7,6 +7,8 @@ import tarfile
 import subprocess
 from shutil import copy2, move
 from time import sleep
+import importlib.util
+import inspect
 
 import numpy as np
 import h5py
@@ -155,6 +157,28 @@ def ensure_converge(ns, sav, allow_failed_ns=True):
             return False
     return sav
 
+def del_files_no_check(files):
+    for cf in files:
+        try:
+            os.remove(cf)
+        except OSError:
+            pass
+
+def run_user_pre(seq):
+    """ run user supplied pre-processing function if exists """
+    file_path = 'goPESTuser.py'
+    module_name = 'user'
+    if os.path.exists(file_path):
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        func = None
+        for n,f in inspect.getmembers(module, inspect.isfunction):
+            if n == 'pre_' + seq:
+                print('Calling user function %s() in %s' % (n, file_path))
+                func()
+
 def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
               allow_failed_ns=True, silent=True):
     """
@@ -170,45 +194,41 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
     fdato = runtime['filename']['dat_orig']
     fdats = runtime['filename']['dat_seq']
     flsts = runtime['filename']['lst_seq']
+    sequence = config['model']['sequence']
 
     if os.path.exists(finc):
         # check incon
         inc_h5 = h5py.File(finc, 'r')
         inc_idx = len(inc_h5['time'][:,0]) - 1
         if inc_idx < 0:
+            inc_h5.close()
             raise Exception("ERROR! Waiwera initial conditions file '%s' has no data." % finc)
         inc_h5.close()
-        use_inc = '--' # use dummy in dat.json(), then replaced later
     else:
         raise Exception("Error! Waiwera initial conditions file '%s' not found." % finc)
 
+    # call user pre-processing
+    # user is responsible of reading/writing files
+    run_user_pre(sequence[0])
+
     with open(fdats[0], 'r') as f:
-        wai_ns = json .load(f)
+        wai_ns = json.load(f)
     # overwrite these just to be safe
-    wai_ns["thermodynamics"] = {"name": "ifc67", "extrapolate": True}
     wai_ns["output"]["filename"] = flsts[0]
-    # wai_ns["output"]["frequency"] = 1000
-    # wai_ns["time"]["step"]["maximum"]["number"] = 80000
-    # wai_ns["time"]["stop"] = 0.5e14
     wai_ns["mesh"]["filename"] = "g_real_model.msh"
-    if use_inc == '--':
-       wai_ns["initial"] = {"filename": finc, "index": inc_idx}
+    wai_ns["initial"] = {"filename": finc, "index": inc_idx}
     if silent:
         wai_ns["logfile"] = {"echo": False}
     else:
         wai_ns["logfile"] = {"echo": True}
-    json.dump(wai_ns, open(fdats[0], 'w'), indent=2, sort_keys=True)
+    with open(fdats[0], 'w') as f:
+        json.dump(wai_ns, f, indent=2, sort_keys=True)
 
     # clean up
-    clean_files = [
+    del_files_no_check([
         flsts[0],
         fdats[0].replace('.json', '.yaml'),
-    ]
-    for cf in clean_files:
-        try:
-            os.remove(cf)
-        except OSError:
-            pass
+        ])
 
     model_args = [fdats[0]] + config['simulator']['cmd-options']
     if config['mode'] == 'local':
@@ -236,60 +256,20 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
             print('NS failed after %.1f seconds' % (time.time() - START_TIME))
             if not allow_failed_ns:
                 return False
+    else:
+        raise Exception('NS failed, result %s not found.' % flsts[0])
 
     if skippr:
         msg = 'Skipped PR, use NS result as PR for goPESTobs/pest_model'
         print(msg)
         return True
 
+    # call user pre-processing
+    # user is responsible of reading/writing files
+    run_user_pre(sequence[-1])
 
     with open(fdats[-1], 'r') as f:
         wai_pr = json.load(f)
-    # update NS things into PR
-    ns_source = {s['name']:s for s in wai_ns['source']}
-    new_pr_source = []
-    for s in wai_pr['source']:
-        if s['name'] in ns_source:
-            new_pr_source.append(ns_source[s['name']])
-        else:
-            new_pr_source.append(s)
-    wai_pr['source'] = new_pr_source
-    wai_pr['rock'] = wai_ns['rock']
-    """
-            :      - NS - PR -   #
-      upflow:   77 -  y -  y -  261 == 261
-      up co2:   66 -  y -  y -  258 == 258
-      uprech:    3 -    -  y -    0    239
-      heat  :   88 -  y -  y - 1435 == 1435 (columns)
-    rain co2:   98 -  y -    - 1330    0    (same columns as rain)
-    rain    :   99 -  y -  y - 1330 == 1330
-
-    rech_ratio seems to be constant 1.0e-7
-    co2_ratio seems to be of lots diff values
-    """
-    # get upflow mass rate first
-    upflow_rates = {}
-    for s in wai_pr['source']:
-        if s['name'].endswith('77') and s['name'][0] not in ['P', 'R']:
-            upflow_rates[s['name'][:3]] = s['rate']
-    # fix '66' based on ratio extracted
-    with open('data_co2_ratio.json', 'r') as f:
-        co2_ratio = json.load(f)
-    for s in wai_pr['source']:
-        if s['name'] in co2_ratio:
-            if s['name'][:3] in upflow_rates:
-                s['rate']= co2_ratio[s['name']] * upflow_rates[s['name'][:3]]
-            else:
-                print('warning source %s rate not set, cannot find source %s77' % (s['name'], s['name'][:3]))
-    # fix ' 3' upflow recharge coeff, constant 1.0e-7
-    for s in wai_pr['source']:
-        if s['name'].endswith(' 3') and s['name'][0] not in ['P', 'R']:
-            if s['name'][:3] in upflow_rates:
-                s['recharge']['coefficient'] = 1.0e-7 * upflow_rates[s['name'][:3]]
-            else:
-                print('warning source %s recharge.coefficient not set, cannot find source %s77' % (s['name'], s['name'][:3]))
-    # other misc things
-    wai_pr["thermodynamics"] = {"name": "ifc67", "extrapolate": True}
     wai_pr['output']['filename'] = flsts[-1]
     wai_pr["initial"] = {"filename": flsts[0], "index": inc_idx}
     wai_pr["mesh"]["filename"] = "g_real_model.msh"
@@ -297,19 +277,14 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         wai_pr["logfile"] = {"echo": False}
     else:
         wai_pr["logfile"] = {"echo": True}
-
-    json.dump(wai_pr, open(fdats[-1], 'w'), indent=2, sort_keys=True)
+    with open(fdats[-1], 'w') as f:
+        json.dump(wai_pr, f, indent=2, sort_keys=True)
 
     # clean up
-    clean_files = [
+    del_files_no_check([
         flsts[-1],
         fdats[-1].replace('.json', '.yaml'),
-    ]
-    for cf in clean_files:
-        try:
-            os.remove(cf)
-        except OSError:
-            pass
+        ])
 
     model_args = [fdats[-1]] + config['simulator']['cmd-options']
     if config['mode'] == 'local':
@@ -337,6 +312,9 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
             print('PR failed after %.1f seconds' % (time.time() - START_TIME))
             if not allow_failed_ns:
                 return False
+    else:
+        raise Exception('PR failed, result %s not found.' % flsts[-1])
+
     return True
 
 def run_ns_pr_mixed(skippr=False, sav2inc=False, simulator='waiwera-dkr',
