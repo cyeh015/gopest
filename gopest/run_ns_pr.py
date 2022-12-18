@@ -178,6 +178,7 @@ def run_user_pre(seq):
             if name == 'pre_' + seq:
                 print('  -> calling %s() ...' % name)
                 func()
+                break
 
 def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
               allow_failed_ns=True, silent=True):
