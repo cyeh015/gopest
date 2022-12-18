@@ -242,6 +242,7 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         print(msg)
         return True
 
+
     with open(fdats[-1], 'r') as f:
         wai_pr = json.load(f)
     # update NS things into PR
@@ -254,18 +255,34 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
             new_pr_source.append(s)
     wai_pr['source'] = new_pr_source
     wai_pr['rock'] = wai_ns['rock']
-    # wai_pr = wai_ns
-    # with open('gs_production.json', 'r') as f:
-    #     data = json.load(f)
-    #     wai_pr['source'] = wai_pr['source'] + data
-    # with open('real_model_pr.output.json', 'r') as f:
-    #     data = json.load(f)
-    #     wai_pr['output'] = data
-    # with open('real_model_pr.time.json', 'r') as f:
-    #     data = json.load(f)
-    #     wai_pr['time'] = data
-    # additional
-    # wai_pr['output']['frequency'] = 0
+    """
+            :      - NS - PR -   #
+      upflow:   77 -  y -  y -  261 == 261
+      up co2:   66 -  y -  y -  258 == 258
+      uprech:    3 -    -  y -    0    239
+      heat  :   88 -  y -  y - 1435 == 1435 (columns)
+    rain co2:   98 -  y -    - 1330    0    (same columns as rain)
+    rain    :   99 -  y -  y - 1330 == 1330
+
+    rech_ratio seems to be constant 1.0e-7
+    co2_ratio seems to be of lots diff values
+    """
+    # get upflow mass rate first
+    upflow_rates = {}
+    for s in wai_pr['source']:
+        if s['name'].endswith('77') and s['name'][0] not in ['P', 'R']:
+            upflow_rates[s['name'][:3]] = s['rate']
+    # fix '66' based on ratio extracted
+    with open('data_co2_ratio.json', 'r') as f:
+        co2_ratio = json.load(f)
+    for s in wai_pr['source']:
+        if s['name'] in co2_ratio:
+            s['rate']= co2_ratio[s['name']] * upflow_rates[s['name'][:3]]
+    # fix ' 3' upflow recharge coeff, constant 1.0e-7
+    for s in wai_pr['source']:
+        if s['name'].endswith(' 3') and s['name'][0] not in ['P', 'R']:
+            s['recharge']['coefficient'] = 1.0e-7 * upflow_rates[s['name'][:3]]
+    # other misc things
     wai_pr["thermodynamics"] = {"name": "ifc67", "extrapolate": True}
     wai_pr['output']['filename'] = flsts[-1]
     wai_pr["initial"] = {"filename": flsts[0], "index": inc_idx}
@@ -274,8 +291,6 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         wai_pr["logfile"] = {"echo": False}
     else:
         wai_pr["logfile"] = {"echo": True}
-
-
 
     json.dump(wai_pr, open(fdats[-1], 'w'), indent=2, sort_keys=True)
 
