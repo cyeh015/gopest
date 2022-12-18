@@ -147,7 +147,7 @@ slave_files += [
 ]
 slave_files += runtime['filename']['all_geoms']
 slave_files += runtime['filename']['dat_seq']
-slave_files += runtime['filename']['lst_seq']
+# slave_files += runtime['filename']['lst_seq']
 # user files -> copied from toml
 slave_files += cfg['files']['slave']
 
