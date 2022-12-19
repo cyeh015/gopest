@@ -396,7 +396,7 @@ def gen_slaves_sl(fname="_slaves_job.sl"):
         "echo starting %i PEST slaves on single node..." % NUM_SLAVES,
         "for i in {1..%i}" % NUM_SLAVES,
         "do",
-        "    `srun --overlap bash _run_a_slave.sh ${i} &",
+        "    srun --overlap bash _run_a_slave.sh ${i} &",
         "done",
         "",
         "# for both background shell jobs (master and slaves srun) to finish",
