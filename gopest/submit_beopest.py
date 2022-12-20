@@ -919,7 +919,7 @@ def submit_cli(argv=[]):
     cmd = "sbatch --dependency after:%s _slaves_job.sl" % dependency
     #out = check_output(cmd).strip()
     #print("BeoPEST Slaves: ", out)
-    print("Add more slaves (while master is running) by using command:")
+    print("Add more slaves (after master job is submitted) by using command:")
     print("    %s" % cmd)
 
 
