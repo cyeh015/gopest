@@ -80,7 +80,7 @@ def fixpcf_modelcmd(fpst):
         ])
         filedist = "\n".join([
             '2 %s %s %s %s' % (fsave, fincon, fincon, fincon),
-            '1 %s %s.999' % (fincon, fincon),
+            '1 %s %s.999' % (fsave, fincon),
             '1 %s %s.999' % (fdatns, fdatns),
             '1 %s %s.999' % (flstpr, flstpr),
             '1 pest_model.dat pest_model.dat.999',
