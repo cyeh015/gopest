@@ -14,7 +14,7 @@ def rename_latest_files(argv=[]):
     to here.  They will be named as '*.999'.  This script renames these to the
     latest iteration number.
     """
-    print('rename_latest_files.py:')
+    print('gopest save-iter-model (rename_latest_files.py):')
 
     # try:
     #     copy2('real_model.incon.999', 'real_model.incon')
