@@ -546,7 +546,7 @@ def gen_run_single_slave(fname="_run_a_slave.sh"):
     lines = [
         "#!/bin/bash",
         "",
-        "echo running %s $1..." % fname,
+        "echo running %s $1 in %s..." % (fname, slave_dir),
         "",
         "sleep 5",
         "mkdir -pv %s" % slave_dir,
