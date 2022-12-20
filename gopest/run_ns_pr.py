@@ -571,13 +571,13 @@ def run_ns_pr():
                                  sav2inc=True,
                                  simulator=config['simulator']['executable'],
                                  allow_failed_ns=True,
-                                 silent=True)
+                                 silent=False)
     elif config['simulator']['input-type'] == 'aut2':
         return run_ns_pr_aut2(skippr=config['model']['skip-pr'],
                               sav2inc=False,
                               simulator=config['simulator']['executable'],
                               allow_failed_ns=True,
-                              silent=True)
+                              silent=False)
     else:
         raise NotImplementedError('No implementation of run_ns_pr() for input-type: ' + config['simulator']['input-type'])
 
