@@ -1,3 +1,4 @@
+import os
 import os.path
 import toml
 import string
@@ -19,7 +20,7 @@ try:
     with open(ftoml, 'r') as f:
         config = toml.load(f)
 except FileNotFoundError:
-    print("Error! Config file '%s' is not found." % ftoml)
+    print("Error! Config file '%s' is not found in %s" % (ftoml, os.getcwd()))
     ans = input('Do you want goPEST to create a default file? (y/n) ')
     if 'y' in ans.lower():
         with open(ftoml, 'w') as f:
