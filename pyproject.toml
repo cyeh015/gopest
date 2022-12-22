@@ -20,10 +20,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
+    "PyTOUGH",
     "numpy",
     "scipy",
     "h5py",
-    "PyTOUGH",
+    "pyyaml",
     "toml",
     "setuptools_scm",
 ]

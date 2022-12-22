@@ -21,6 +21,7 @@ xx  run                            (run_beopest)
     run-pest-model                 (pest_model)
     run-forward                    (run_ns_pr)
     save-iter-files                (rename_latest_files)
+    check-slaves                   (check_slaves)
 
 Important files for goPEST to work:
     goPESTconfig.toml
@@ -32,6 +33,8 @@ Important files for goPEST to work:
 
 University of Auckland, 2012, 2022
 """
+
+import gopest.common
 
 def gopest_cli():
     print(title)
@@ -49,6 +52,7 @@ def gopest_cli():
             import gopest.submit_beopest
             import gopest.make_case_pst
             import gopest.rename_latest_files
+            import gopest.check_slaves
             cmds = {
                 'par': gopest.par.goPESTpar,
                 'obs': gopest.obs.goPESTobs,
@@ -57,6 +61,7 @@ def gopest_cli():
                 'submit': gopest.submit_beopest.submit_cli,
                 'init': gopest.make_case_pst.make_case_cli,
                 'save-iter-files': gopest.rename_latest_files.rename_latest_files,
+                'check-slaves': gopest.check_slaves.check_slaves_cli,
             }
             if sys.argv[1] not in cmds:
                 print(version + hlp)
