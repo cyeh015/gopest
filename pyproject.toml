@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "goPEST"
 description = "A TOUGH2/Waiwera interface to PEST"
+url = "https://github.com/cyeh015/gopest"
 readme = "README.md"
 requires-python = ">=2.7"
 keywords = ["goPEST", "PEST", "Waiwera", "TOUGH2", "AUTOUGH2"]
