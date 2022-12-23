@@ -138,18 +138,18 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
         else:
             print("--- could not find matching pars, obsreref continue with normal run")
 
-    if not local:
-        print("--- use master INCON")
-        try:
-            copy2(master_dir + sep + fincon, fincon)
-        except Error as e:
-            # OK if src and dst are the same file, simply skip.
-            print(e)
-
     ### RUN TOUGH2 model
     if skiprun:
         print("--- skip actual TOUGH2 run")
     else:
+        if not local:
+            print("--- use master INCON")
+            try:
+                copy2(master_dir + sep + fincon, fincon)
+            except Error as e:
+                # OK if src and dst are the same file, simply skip.
+                print(e)
+
         START_TIME = time.time()
         print("--- run_ns_pr.py")
         runok = run_ns_pr()
