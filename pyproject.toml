@@ -5,7 +5,6 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "goPEST"
 description = "A TOUGH2/Waiwera interface to PEST"
-url = "https://github.com/cyeh015/gopest"
 readme = "README.md"
 requires-python = ">=2.7"
 keywords = ["goPEST", "PEST", "Waiwera", "TOUGH2", "AUTOUGH2"]
@@ -30,6 +29,9 @@ dependencies = [
     "setuptools_scm",
 ]
 dynamic = ["version"]
+
+[metadata]
+url = "https://github.com/cyeh015/gopest"
 
 [tool.setuptools_scm]
 # this allows pip install to create proper version in the metadata
