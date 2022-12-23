@@ -74,7 +74,7 @@ class message(object):
         self.level, self.source, self.event, self.data = msg
 
 
-def check_run_status(spath, ends=False):
+def check_sim_ends(spath):
     """ extract summary of waiwera simulation from yaml log """
     def waiwera_ends(fyaml):
         """ return elapsed time in seconds of waiwera simulation time, None if not
@@ -101,13 +101,29 @@ def check_run_status(spath, ends=False):
     flsts = runtime['filename']['lst_seq']
     for i,seq in enumerate(sequence):
         results['run'][seq] = {}
-        results['run'][seq]['exists'] = os.path.exists(flsts[i])
         if input_typ== 'waiwera':
             fyaml = flsts[i].replace('.h5', '.yaml')
-            results['run'][seq] = nested_dict_update(results['run'][seq],
-                                                     waiwera_ends(fyaml))
+            results['run'][seq] = waiwera_ends(fyaml)
         else:
             raise NotImplementedError()
+
+    os.chdir(cwd)
+    # print('Restored directory %s' % cwd)
+    return results
+
+def check_run_status(spath):
+    """ extract summary of waiwera simulation from yaml log """
+    cwd = os.getcwd()
+    os.chdir(spath)
+    print('Working in %s...' % spath)
+
+    results = {'run': {}}
+    sequence = config['model']['sequence']
+    input_typ = config['simulator']['input-type']
+    flsts = runtime['filename']['lst_seq']
+    for i,seq in enumerate(sequence):
+        results['run'][seq] = {}
+        results['run'][seq]['exists'] = os.path.exists(flsts[i])
 
     os.chdir(cwd)
     # print('Restored directory %s' % cwd)
@@ -126,7 +142,7 @@ def get_obj_fn(spath):
     return results
 
 hlp = '''
-Usage: gopest check-slaves [--end-time] [--obj-fn] [--dir path_to_slaves]
+Usage: gopest check-slaves [--status] [--end-time] [--obj-fn] [--dir path_to_slaves]
 
 The check-slaves command searches through slave directories and obtain/collect
 their running status etc.  By default, the pest.slave_dirs property from
@@ -137,7 +153,10 @@ Extracted information will be dumped into a JSON file "goPESTslaves.json".  Note
 that the command will only update/append results into the JSON file if exists.
 It tries not to destroy whatever that is already in the file.
 
-At the very minimum, check-slaves will check if model output files exists.
+The fastest check is using option "--status", which only checks if model output
+files exist in the lsave directories.  (ie. did the runs produce any output
+files at all)
+
 Argument "--end-time" enables extraction of simulation end time (from output
 YAML file if running waiwera as simulator).
 
@@ -148,10 +167,12 @@ objective function will be extracted from model outputs within the slave
 directory.
 
 This command runs locally, and does not utilise any slurm/srun/queue facilities.
+
+This message can be printed with the "--help" argument.
 '''
 
 def check_slaves_cli(argv=[]):
-    if len(argv) <= 1:
+    if '--help' in argv or len(argv) <= 1:
         print(hlp)
         exit(0)
     else:
@@ -163,23 +184,36 @@ def check_slaves_cli(argv=[]):
                 raise Exception('--dir argument needs to be followed by path_to_slaves')
         else:
             spath = config['pest']['slave_dirs']
+        nopts, tasks = 0, []
+        if "--status" in argv:
+            nopts += 1
+            tasks.append('status')
+        if "--end-time" in argv:
+            nopts += 1
+            tasks.append('end-time')
+        if "--obj-fn" in argv:
+            nopts += 1
+            tasks.append('obj-fn')
+        if nopts == 0:
+            print(hlp)
+            print('Please specify at least one task to perform.')
+            exit(0)
 
     start_time = time.time()
     if not all([os.path.exists(spath), os.path.isdir(spath)]):
         raise Exception('Specified path_to_slaves needs to be a valid directory: %s' % spath)
 
     task_fn = {
-        'slaves_status': check_run_status,
-        'slaves_objfn': get_obj_fn,
+        'end-time': check_sim_ends,
+        'status': check_run_status,
+        'obj-fn': get_obj_fn,
     }
-    task = 'slaves_status'
 
     slave_paths = sorted([p for p in glob.glob(os.path.join(spath, '*')) if os.path.isdir(p)])
     slave_names = [os.path.basename(sp) for sp in slave_paths]
 
     ncpu = max(1, cpu_count() - 1)
     pool = Pool(ncpu)
-    results = pool.map(task_fn[task], slave_paths)
 
     fout = 'goPESTslaves.json'
     if os.path.exists(fout):
@@ -187,7 +221,12 @@ def check_slaves_cli(argv=[]):
             data = json.load(f)
     else:
         data = {}
-    data = nested_dict_update(data, dict(zip(slave_names, results)))
+
+    for task in tasks:
+        results = pool.map(task_fn[task], slave_paths)
+        print('!: ', task, results)
+        data = nested_dict_update(data, dict(zip(slave_names, results)))
+
     with open(fout, 'w') as f:
         json.dump(data, f, indent=4, sort_keys=True)
 
