@@ -36,6 +36,47 @@ def unix2dos(fname):
     with open(fname, 'wb') as outfile:
         outfile.write( outstr )
 
+def fixpcf_noptmax(fpst, noptmax=0):
+    """ update PEST case file (.pst) with NOPTMAX, number of optimisation
+    iterations
+    """
+    fpst_bk = fpst + '.backup'
+    if not os.path.isfile(fpst):
+        print('Error: %s does not exist.' % fpst)
+        exit(1)
+    if os.path.isfile(fpst_bk):
+        os.remove(fpst_bk)
+    os.rename(fpst, fpst_bk)
+
+    try:
+        with open(fpst_bk,'r') as fin, open(fpst, 'w') as fout:
+            linesep = None # use current file's line ending
+            isec = 7 # start with 7, so that it will never be 7 again
+            for line in fin:
+                # detect current file's line ending first
+                if linesep is None:
+                    if line[-2] == '\r' and line[-1] == '\n':
+                        linesep = '\r\n'
+                    elif line[-1] == '\n':
+                        linesep = '\n'
+                # find correct line, replace
+                isec += 1
+                oline = line
+                if line.strip().startswith('*') and 'control data' in line:
+                    isec = 0
+                if isec == 7:
+                    # replace first item in line (NOPTMAX)
+                    sps = line.split()
+                    oline = ' ' + ' '.join([str(noptmax)] + sps[1:] + [linesep])
+                fout.write(oline)
+    except Exception as e:
+        fin.close()
+        fout.close()
+        print('fixpcf_noptmax() failed to proceed, restoring...')
+        os.remove(fpst)
+        os.rename(fpst_bk, fpst)
+        raise(e)
+
 def read_rec(rec_file):
     values = {}
     with open(rec_file, 'r') as f:
@@ -151,6 +192,9 @@ def get_obj_fn(spath):
     cfg['model']['skip'] = True
     with open('goPESTconfig.toml', 'w') as f:
         tomlkit.dump(cfg, f)
+
+    fpst = config['pest']['case-name'] + '.pst'
+    fixpcf_noptmax(fpst, 0)
 
     results = {}
 

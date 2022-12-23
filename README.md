@@ -41,3 +41,4 @@ To get a list of supported COMMANDs, type `gopest help`.
 
 - remove obsreref rekated things, use pest_hp now
 
+- I have checked a few PEST related Python libraries.  I am looking for something small and pure for basic editing of PEST control file.  But these are too big for my liking.  I should reconsider about using them.
