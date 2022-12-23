@@ -20,6 +20,7 @@ User needs to prepare a few files for goPEST to work:
 
 - `goPESTobs.list` is where user specifies model observations for PEST
 
+- `goPESTuser.py` is optional if user wish do perform customised setups when the simulation transit from one stage to the next stage in sequence of simulator runs (eg. usually `ns` and `pr` normally natural state then followed by production history).
 
 ## Basic usage
 
@@ -29,7 +30,26 @@ The main CLI script `gopest` is to be followed by COMMAND and associated argumen
 
 To get a list of supported COMMANDs, type `gopest help`.
 
+The first step is to initialise the working directory:
 
+```gopest init```
+
+will setup the current folder.  Several tasks were performed:
+
+- copy user's model files into what goPEST uses internally, these are the `real_model_xxx.*` files, in the current folder, which is also the master folder where PEST is expected to work on.
+
+- go through `goPESTpar.list`, extract and set up parameter data in the PEST control file (usually `case.pst`).  The corresponding `.tpl` files etc required by PEST will be set up.  Note the parameters used in the real model will be extracted and used as the initial parameters in the PEST.
+
+- go through `goPESTobs.list`, and set up observation data in the PEST control file.  Corresponding PEST instruction file `.ins` will also be set up automatically.
+
+If all goes well, user can simply run the command:
+
+```gopest submit``` or
+```gopest run``` 
+
+to start the PEST run.  Command `submit` is for the NeSI cluster environment using SLURM.  Job will be submitted to cluster queue.  PEST master and agents will be launched automatically.  On a local machine where user has full access `gopest run` is used.
+
+## 
 
 
 ## Development notes
