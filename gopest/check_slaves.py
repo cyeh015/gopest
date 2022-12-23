@@ -181,6 +181,9 @@ def get_obj_fn(spath):
     2. (safe) it's probably safer to leave as modified here, reduce possibility
        for user to wipe out existing model output files, which can be costly to
        run
+
+    Unfortunately I need to modify the config.toml file, because gopest run-
+    pest-model is involked by PEST, not this script directly.
     """
     cwd = os.getcwd()
     os.chdir(spath)
@@ -193,24 +196,36 @@ def get_obj_fn(spath):
     with open('goPESTconfig.toml', 'w') as f:
         tomlkit.dump(cfg, f)
 
+    # modify NOPTMAX in control data .pst file
     fpst = config['pest']['case-name'] + '.pst'
     fixpcf_noptmax(fpst, 0)
 
+    cmd = [
+        os.path.join(config['pest']['dir'], config['pest']['executable']),
+        config['pest']['case-name'],
+        ]
+    print('Running: ', cmd)
     results = {}
-
-    # with open('model.bat', 'w') as f:
-    #     f.write('python pest_model.py --local --skip-run --waiwera')
-    # shutil.copy('../case_reg.pst', 'case_reg.pst')
-    # subprocess.call(['pest', 'case_reg.pst'])
-    # results = read_rec('case_reg.rec')
+    subprocess.call(cmd)
+    results['obj-fn'] = read_rec('case_reg.rec')
 
     os.chdir(cwd)
     # print('Restored directory %s' % cwd)
     return results
 
+
+def init_slave(cfg, rt):
+    """ used in multiprocessing Pool to initialise threads with the the updated
+    gopest.common.config and gopest.common.runtime
+    """
+    print('Updating local thread common.config and common.runtime.')
+    global config, runtime
+    config = cfg
+    runtime = rt
+
 hlp = '''
-Usage: gopest check-slaves [--status] [--end-time] [--obj-fn]
-                           [--dir path_to_slaves] [--help]
+Usage: gopest check-slaves [--help] [--status] [--end-time] [--obj-fn]
+                           [--dir path_to_slaves] [--pest-exe pest_executable]
 
 The check-slaves command searches through slave directories and obtain/collect
 their running status etc.  By default, the pest.slave_dirs property from
@@ -232,6 +247,11 @@ running waiwera as simulator).
 model runs.  This essentially runs PEST so that observations and objective
 function will be extracted from model outputs within the slave directory.
 
+"--pest-exe" is useful with the "--obj-fn" option when user have the slaves
+directories in a different environment than where it was originally run.
+pest_executable here can include the path to the executable if it's not already
+in the system's PATH.
+
 This command runs locally, and does not utilise any slurm/srun/queue facilities.
 
 This message can be printed with the "--help" argument.  It is possible to
@@ -243,6 +263,7 @@ def check_slaves_cli(argv=[]):
         print(hlp)
         exit(0)
     else:
+        # overwrite slave_dirs
         if '--dir' in argv:
             iarg = argv.index('--dir') + 1
             try:
@@ -251,6 +272,20 @@ def check_slaves_cli(argv=[]):
                 raise Exception('--dir argument needs to be followed by path_to_slaves')
         else:
             spath = config['pest']['slave_dirs']
+        # overwrite PEST exe
+        if "--pest-exe" in argv:
+            iarg = argv.index('--pest-exe') + 1
+            try:
+                pexe = argv[iarg]
+            except IndexError:
+                raise Exception('--pest-exe argument needs to be followed by pest_executable')
+            # modify the shared module variable
+            config['pest']['dir'] = ''
+            config['pest']['executable'] = pexe
+        else:
+            # do nothing, keeps original setting
+            pass
+        # tasks
         nopts, tasks = 0, []
         if "--status" in argv:
             nopts += 1
@@ -280,7 +315,8 @@ def check_slaves_cli(argv=[]):
     slave_names = [os.path.basename(sp) for sp in slave_paths]
 
     ncpu = max(1, cpu_count() - 1)
-    pool = Pool(ncpu)
+    print('Starting %i workers to process %i slaves' % (ncpu, len(slave_paths)))
+    pool = Pool(ncpu, initializer=init_slave, initargs=(config, runtime))
 
     fout = 'goPESTslaves.json'
     if os.path.exists(fout):
