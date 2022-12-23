@@ -90,7 +90,7 @@ def check_run_status(spath, ends=False):
                     elapsed = data[-1][3]['elapsed_seconds']
                 return {'endtime': time, 'stepsize': size, 'elapsed': elapsed}
         except:
-            return None
+            return {}
     cwd = os.getcwd()
     os.chdir(spath)
     print('Working in %s...' % spath)
@@ -104,7 +104,8 @@ def check_run_status(spath, ends=False):
         results['run'][seq]['exists'] = os.path.exists(flsts[i])
         if input_typ== 'waiwera':
             fyaml = flsts[i].replace('.h5', '.yaml')
-            results['run'][seq] = waiwera_ends(fyaml)
+            results['run'][seq] = nested_dict_update(results['run'][seq],
+                                                     waiwera_ends(fyaml))
         else:
             raise NotImplementedError()
 
