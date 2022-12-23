@@ -10,6 +10,7 @@ import subprocess
 import collections.abc
 
 import yaml
+import tomlkit
 
 from gopest.common import config
 from gopest.common import runtime
@@ -130,15 +131,37 @@ def check_run_status(spath):
     return results
 
 def get_obj_fn(spath):
-    print(spath)
-    org_dir = os.getcwd()
+    """ Return PEST calculated objective function values by modifying config and
+    PEST case file to run a dummy run.  Then read results from case .rec file.
+
+    This is more destructive, but I have decided to leave those modification
+    in place after running the command for a couple of reasons:
+    1. (lazy) no need to handle undo the mod if exception is raised
+    2. (safe) it's probably safer to leave as modified here, reduce possibility
+       for user to wipe out existing model output files, which can be costly to
+       run
+    """
+    cwd = os.getcwd()
     os.chdir(spath)
-    with open('model.bat', 'w') as f:
-        f.write('python pest_model.py --local --skip-run --waiwera')
-    shutil.copy('../case_reg.pst', 'case_reg.pst')
-    subprocess.call(['pest', 'case_reg.pst'])
-    results = read_rec('case_reg.rec')
-    os.chdir(org_dir)
+    print('Working in %s...' % spath)
+
+    # modify config to skip model run
+    with open('goPESTconfig.toml', 'r') as f:
+        cfg = tomlkit.load(f)
+    cfg['model']['skip'] = True
+    with open('goPESTconfig.toml', 'w') as f:
+        tomlkit.dump(cfg, f)
+
+    results = {}
+
+    # with open('model.bat', 'w') as f:
+    #     f.write('python pest_model.py --local --skip-run --waiwera')
+    # shutil.copy('../case_reg.pst', 'case_reg.pst')
+    # subprocess.call(['pest', 'case_reg.pst'])
+    # results = read_rec('case_reg.rec')
+
+    os.chdir(cwd)
+    # print('Restored directory %s' % cwd)
     return results
 
 hlp = '''
