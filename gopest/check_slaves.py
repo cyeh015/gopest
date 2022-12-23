@@ -193,6 +193,7 @@ def get_obj_fn(spath):
     flst = runtime['filename']['lst_seq'][-1]
     if not os.path.exists(flst):
         print('Real model output file %s is missing, cannot get obj. fn.' % flst)
+        os.chdir(cwd)
         return {}
 
     # modify config to skip model run
