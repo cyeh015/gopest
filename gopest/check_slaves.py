@@ -142,7 +142,8 @@ def get_obj_fn(spath):
     return results
 
 hlp = '''
-Usage: gopest check-slaves [--status] [--end-time] [--obj-fn] [--dir path_to_slaves]
+Usage: gopest check-slaves [--status] [--end-time] [--obj-fn]
+                           [--dir path_to_slaves] [--help]
 
 The check-slaves command searches through slave directories and obtain/collect
 their running status etc.  By default, the pest.slave_dirs property from
@@ -153,18 +154,16 @@ Extracted information will be dumped into a JSON file "goPESTslaves.json".  Note
 that the command will only update/append results into the JSON file if exists.
 It tries not to destroy whatever that is already in the file.
 
-The fastest check is using option "--status", which only checks if model output
-files exist in the lsave directories.  (ie. did the runs produce any output
-files at all)
+"--status" is the fastest option, which only checks if model output files exist
+in the lsave directories.  (ie. did the runs produce any output files at all)
 
-Argument "--end-time" enables extraction of simulation end time (from output
-YAML file if running waiwera as simulator).
+"--end-time" enables extraction of simulation end time (from output YAML file if
+running waiwera as simulator).
 
-Argument "--obj-fn" is more destructive.  Within each slave directory, it will
-run PEST (with the NOPTMAX set to 0) once with the internal settings set to skip
-actual model runs.  This essentially runs PEST so that observations and
-objective function will be extracted from model outputs within the slave
-directory.
+"--obj-fn" is more destructive.  Within each slave directory, it will run PEST
+(with the NOPTMAX set to 0) once with the internal settings set to skip actual
+model runs.  This essentially runs PEST so that observations and objective
+function will be extracted from model outputs within the slave directory.
 
 This command runs locally, and does not utilise any slurm/srun/queue facilities.
 
@@ -223,8 +222,8 @@ def check_slaves_cli(argv=[]):
         data = {}
 
     for task in tasks:
+        print('Checking %s...' % task)
         results = pool.map(task_fn[task], slave_paths)
-        print('!: ', task, results)
         data = nested_dict_update(data, dict(zip(slave_names, results)))
 
     with open(fout, 'w') as f:
