@@ -1,6 +1,6 @@
 import os
 import os.path
-import toml
+import tomlkit
 import string
 
 # Access nested dictionary items via a list of keys
@@ -18,7 +18,7 @@ from gopest.defaults import default_cfg
 ftoml = 'goPESTconfig.toml'
 try:
     with open(ftoml, 'r') as f:
-        config = toml.load(f)
+        config = tomlkit.load(f)
 except FileNotFoundError:
     print("Error! Config file '%s' is not found in %s" % (ftoml, os.getcwd()))
     ans = input('Do you want goPEST to create a default file? (y/n) ')
