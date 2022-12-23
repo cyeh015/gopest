@@ -147,8 +147,8 @@ Usage: gopest check-slaves [--status] [--end-time] [--obj-fn]
 
 The check-slaves command searches through slave directories and obtain/collect
 their running status etc.  By default, the pest.slave_dirs property from
-goPESTconfig.toml is searched. It is possible to specify a different directory
-by using argument "--dir".
+goPESTconfig.toml is used. It is possible to specify a different directory by
+using argument "--dir".
 
 Extracted information will be dumped into a JSON file "goPESTslaves.json".  Note
 that the command will only update/append results into the JSON file if exists.
@@ -167,7 +167,8 @@ function will be extracted from model outputs within the slave directory.
 
 This command runs locally, and does not utilise any slurm/srun/queue facilities.
 
-This message can be printed with the "--help" argument.
+This message can be printed with the "--help" argument.  It is possible to
+include more than one option at a time.
 '''
 
 def check_slaves_cli(argv=[]):
