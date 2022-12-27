@@ -34,23 +34,22 @@ The first step is to initialise the working directory:
 
 ```gopest init```
 
-will setup the current folder.  Several tasks were performed:
+will setup the current folder.  If all goes well, user can simply run the command:
+
+```gopest submit``` or
+```gopest run``` 
+
+to start the PEST run.  Command `submit` is for the NeSI cluster environment using SLURM.  Job(s) will be submitted to the cluster queue.  PEST master and agents will be launched automatically.  On a local machine where user has full access `gopest run` is used.
+
+## How goPEST works
+
+Several tasks were performed by the `init` command:
 
 - copy user's model files into what goPEST uses internally, these are the `real_model_xxx.*` files, in the current folder, which is also the master folder where PEST is expected to work on.
 
 - go through `goPESTpar.list`, extract and set up parameter data in the PEST control file (usually `case.pst`).  The corresponding `.tpl` files etc required by PEST will be set up.  Note the parameters used in the real model will be extracted and used as the initial parameters in the PEST.
 
 - go through `goPESTobs.list`, and set up observation data in the PEST control file.  Corresponding PEST instruction file `.ins` will also be set up automatically.
-
-If all goes well, user can simply run the command:
-
-```gopest submit``` or
-```gopest run``` 
-
-to start the PEST run.  Command `submit` is for the NeSI cluster environment using SLURM.  Job will be submitted to cluster queue.  PEST master and agents will be launched automatically.  On a local machine where user has full access `gopest run` is used.
-
-## 
-
 
 ## Development notes
 
