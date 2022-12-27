@@ -11,6 +11,7 @@ import collections.abc
 
 import yaml
 import tomlkit
+import xlwt
 
 from gopest.common import config
 from gopest.common import runtime
@@ -220,6 +221,48 @@ def get_obj_fn(spath):
     # print('Restored directory %s' % cwd)
     return results
 
+def export_xls(data):
+    phis, regs, others = [], [], []
+    for sln,sl in data.items():
+        if 'obj-fn' in sl:
+            for n in sorted(sl['obj-fn'].keys()):
+                if n.startswith('phi'):
+                    phis.append(n)
+                elif n.startswith('regul_'):
+                    regs.append(n)
+                else:
+                    others.append(n)
+            phis, regs, others = sorted(phis), sorted(regs), sorted(others)
+            break
+    runcs = []
+    for sln,sl in data.items():
+        if 'run' in sl:
+            for rn,r in sl['run'].items():
+                runcs += [rn+'.'+c for c in sorted(r.keys())]
+            break
+    cols = ['slave'] + phis + others + regs + runcs
+
+    wb = xlwt.Workbook()
+    ws = wb.add_sheet('slaves')
+
+    i = 0
+    for j,c in enumerate(cols):
+        ws.write(i, j, c)
+
+    for sln,sl in data.items():
+        i += 1
+        j = 0
+        ws.write(i, j, sln)
+        for p in (phis + others + regs):
+            j += 1
+            if p in sl['obj-fn']:
+                ws.write(i, j, sl['obj-fn'][p])
+        for r in runcs:
+            j += 1
+            rn,sn = r.split('.')
+            if 'run' in sl and rn in sl['run'] and sn in sl['run'][rn]:
+                ws.write(i, j, sl['run'][rn][sn])
+    wb.save('goPESTslaves.xls')
 
 def init_slave(cfg, rt):
     """ used in multiprocessing Pool to initialise threads with the the updated
@@ -233,6 +276,7 @@ def init_slave(cfg, rt):
 hlp = '''
 Usage: gopest check-slaves [--help] [--status] [--end-time] [--obj-fn]
                            [--dir path_to_slaves] [--pest-exe pest_executable]
+                           [--export-xls]
 
 The check-slaves command searches through slave directories and obtain/collect
 their running status etc.  By default, the pest.slave_dirs property from
@@ -258,6 +302,10 @@ function will be extracted from model outputs within the slave directory.
 directories in a different environment than where it was originally run.
 pest_executable here can include the path to the executable if it's not already
 in the system's PATH.
+
+"--export-xls" is used to export contents of goPESTslaves.json into spreadsheet
+file goPESTslaves.xls.  This command can be used alone as it will load existing
+goPESTslaves.json.
 
 This command runs locally, and does not utilise any slurm/srun/queue facilities.
 
@@ -303,6 +351,10 @@ def check_slaves_cli(argv=[]):
         if "--obj-fn" in argv:
             nopts += 1
             tasks.append('obj-fn')
+        xls = False
+        if "--export-xls" in argv:
+            nopts += 1
+            xls = True
         if nopts == 0:
             print(hlp)
             print('Please specify at least one task to perform.')
@@ -339,6 +391,9 @@ def check_slaves_cli(argv=[]):
 
     with open(fout, 'w') as f:
         json.dump(data, f, indent=4, sort_keys=True)
+
+    if xls:
+        export_xls(data)
 
     print('Finished after %f seconds' % (time.time() - start_time))
 

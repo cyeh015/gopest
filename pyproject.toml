@@ -26,6 +26,7 @@ dependencies = [
     "h5py",
     "pyyaml",
     "tomlkit",
+    "xlwt",
     "setuptools_scm",
 ]
 dynamic = ["version"]
