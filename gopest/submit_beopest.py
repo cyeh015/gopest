@@ -820,7 +820,7 @@ def submit_cli(argv=[]):
         jobid = sbatch_check("sbatch _forward.sl", retry_sec=30, retry_limit=50)
         if jobid is not None:
             while os.path.isfile('_status_on_nesi'):
-                sleep(120)
+                sleep(30)
             ttime = check_output("sacct --clusters=mahuika -j %s.0 -o totalcpu -n" % jobid).strip()
             print("\nForward job %s finished after %s" % (jobid, ttime))
         else:
