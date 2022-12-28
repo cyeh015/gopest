@@ -814,7 +814,7 @@ def submit_cli(argv=[]):
         with open('_status_on_nesi', 'w') as f:
             pass
         import random
-        wait_t = random.random() # * 20.0 * 60.0
+        wait_t = random.random() * 5.0 # * 20.0 * 60.0
         print('.. waiting %f sec before submit ..' % wait_t)
         sleep(wait_t)
         jobid = sbatch_check("sbatch _forward.sl", retry_sec=30, retry_limit=50)
