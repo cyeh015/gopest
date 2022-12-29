@@ -161,7 +161,7 @@ master_files += cfg['files']['master']
 
 # All files needed in slave directory
 # TODO: should have both master_files and slave_files
-FILE_LIST = " ".join(master_files)
+FILE_LIST = " ".join(slave_files)
 
 """
 Details
