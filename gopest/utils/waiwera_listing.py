@@ -69,7 +69,7 @@ class wlisting(object):
         ### checks:
         nh5 = len(self.cell_idx)
         if self.geo is not None:
-            print('wlisting.element: uses mulgrid block name (str) as key.')
+            # print('wlisting.element: uses mulgrid block name (str) as key.')
             nb = self.geo.num_blocks - self.geo.num_atmosphere_blocks
             if self.size_check and nh5 != nb:
                 msg = 'HDF5 result %s has %i cells different from geometry %s (%i excl. atmosphere blocks)' % (
@@ -87,7 +87,7 @@ class wlisting(object):
                 blocks += ['     '+str(i) for i in range(nh5 - nb)]
                 w_blocks += ['     '+str(i) for i in range(nh5 - nb)]
         else:
-            print('wlisting.element: uses waiwera natural index (as str) as key.')
+            # print('wlisting.element: uses waiwera natural index (as str) as key.')
             blocks = [str(i) for i in range(nh5)]
             w_blocks = blocks
         ### element table
@@ -105,7 +105,7 @@ class wlisting(object):
             self.face_idx = []
             self.face_idx_dir = []
             if self.geo is not None:
-                print('wlisting.connection: tuple of mulgrid block names (str, str) as key.')
+                # print('wlisting.connection: tuple of mulgrid block names (str, str) as key.')
                 face_keys = self.geo.block_connection_name_list
                 # w_boundary is a list of dict, in the order of wjson boundaries, each dict has key
                 # of block1, gives name of b2.
@@ -172,7 +172,7 @@ class wlisting(object):
                         msg += '\nMulgrid connection name %s not found in Waiwera H5 output.' % str(c)
                         raise Exception(msg)
             else:
-                print('wlisting.connection: tuple of natural cell indices (as str, as str) as key.')
+                # print('wlisting.connection: tuple of natural cell indices (as str, as str) as key.')
                 # keeps whatever order is in h5, NOTE the order is unpredictable
                 face_keys = [(str(i), str(j)) for i,j in zip(cid1, cid2)]
                 self.face_idx = list(range(len(cid1)))
@@ -193,7 +193,7 @@ class wlisting(object):
                 if 'source' in self.wjson and len(self.wjson['source']) == len(self.source_idx):
                     if all(['name' in s for s in self.wjson['source']]) and all(['cell' in s for s in self.wjson['source']]):
                         # each source has a name, each source has a single cell
-                        print('wlisting.generation: detects matching Waiwera input JSON and HDF5 source_fields, use (block name, source name) as key.')
+                        # print('wlisting.generation: detects matching Waiwera input JSON and HDF5 source_fields, use (block name, source name) as key.')
                         cid = [w_blocks[s['cell']] for s in self.wjson['source']]
                         gid = [str(s['name']) for s in self.wjson['source']]
                         source_keys = list(zip(cid, gid))
@@ -203,7 +203,7 @@ class wlisting(object):
                         if 'name' in s:
                             self.source_name_index[s['name']] = i
             if source_keys is None:
-                print('wlisting.generation: use source index (as str) as key.')
+                # print('wlisting.generation: use source index (as str) as key.')
                 # use source index (as str) as key
                 source_keys = [str(i) for i in range(len(self.source_idx))]
                 table = listingtable(cols, source_keys, num_keys=1)
