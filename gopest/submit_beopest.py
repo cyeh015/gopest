@@ -323,7 +323,9 @@ def gen_master_sl(fname="_master_job.sl"):
         # "#SBATCH --ntasks=1          # number of tasks",
         # "#SBATCH --mem=%s  # memory/cpu (in MB)" % MEM_MASTER,
         # # "#SBATCH --workdir=%s  # working dir" % MAIN_DIR,
-        "#SBATCH --ntasks=%i         # number of tasks" % int(NUM_SLAVES / 5),
+        # "#SBATCH --ntasks=%i         # number of tasks" % int(NUM_SLAVES / 5),
+        "#SBATCH --ntasks=1          # number of tasks",
+        "#SBATCH --cpus-per-task=%i  # number of CPUs" % max(int(NUM_SLAVES / 10),1),
         "#SBATCH --overcommit        # allow many tasks on one CPU",
         "#SBATCH --mem=%i  # memory/cpu (in MB)" % (int(MEM_PER_SLAVE) * int(NUM_SLAVES / 5) + int(MEM_MASTER)),
         "#SBATCH --profile task",
@@ -356,8 +358,8 @@ def gen_master_sl(fname="_master_job.sl"):
         "MASTERDIR=`pwd`",
         "echo ${MASTERDIR} > _master_dir",
         "",
-        "rm -f run_ns_pr.log",
-        "echo ${MASTERDIR}/run_ns_pr.log > _logfile",
+        # "rm -f run_ns_pr.log",
+        # "echo ${MASTERDIR}/run_ns_pr.log > _logfile",
         "",
         "# run master",
         # "srun --exclusive -n1 bash %s/_run_master.sh" % MAIN_DIR,
@@ -386,7 +388,8 @@ def gen_slaves_sl(fname="_slaves_job.sl"):
         "#SBATCH -J %s" % jobname,
         "#SBATCH -A %s         # Project Account" % PROJECT,
         "#SBATCH --time=%s     # Walltime" % WALLTIME_SLAVES,
-        "#SBATCH --ntasks=%i         # number of tasks" % int(NUM_SLAVES / 5),
+        "#SBATCH --ntasks=1          # number of tasks",
+        "#SBATCH --cpus-per-task=%i  # number of CPUs" % max(int(NUM_SLAVES / 10),1),
         "#SBATCH --overcommit        # allow many tasks on one CPU",
         "#SBATCH --mem=%i  # memory/cpu (in MB)" % (int(MEM_PER_SLAVE) * int(NUM_SLAVES / 5)),
         "#SBATCH --profile task",
@@ -811,13 +814,13 @@ def submit_cli(argv=[]):
         with open('_status_on_nesi', 'w') as f:
             pass
         import random
-        wait_t = random.random() # * 20.0 * 60.0
+        wait_t = random.random() * 5.0 # * 20.0 * 60.0
         print('.. waiting %f sec before submit ..' % wait_t)
         sleep(wait_t)
         jobid = sbatch_check("sbatch _forward.sl", retry_sec=30, retry_limit=50)
         if jobid is not None:
             while os.path.isfile('_status_on_nesi'):
-                sleep(120)
+                sleep(30)
             ttime = check_output("sacct --clusters=mahuika -j %s.0 -o totalcpu -n" % jobid).strip()
             print("\nForward job %s finished after %s" % (jobid, ttime))
         else:
