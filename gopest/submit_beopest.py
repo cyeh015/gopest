@@ -47,6 +47,7 @@ SIMULATOR = cfg['simulator']['executable']
 
 PST_NAME = cfg['pest']['case-name']
 PESTDIR = cfg['pest']['dir']
+SLAVEDIR = cfg['pest']['slave_dirs']
 BEOPEST = cfg['pest']['executable']
 PORT = cfg['pest']['port']
 
@@ -548,7 +549,7 @@ def gen_run_single_slave(fname="_run_a_slave.sh"):
     # add ./ into PATH so that PEST can run model files without ./
     # "slave_${SLURM_JOB_ID}_${SLURM_STEP_ID}_${SLURM_PROCID}_${SLURM_LOCALID}_$1"
     slave_name = "slave_${SLURM_JOB_ID}_$1"
-    slave_dir = "/nesi/nobackup/%s/inverse/slaves/%s" % (PROJECT, slave_name)
+    slave_dir = os.path.join(SLAVEDIR, slave_name)
     cmd = "%s %s /h ${MASTERHOST}:%s" % (BEOPEST, PST_NAME, PORT)
     lines = [
         "#!/bin/bash",
