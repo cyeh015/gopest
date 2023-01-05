@@ -326,7 +326,7 @@ def gen_master_sl(fname="_master_job.sl"):
         # # "#SBATCH --workdir=%s  # working dir" % MAIN_DIR,
         # "#SBATCH --ntasks=%i         # number of tasks" % int(NUM_SLAVES / 5),
         "#SBATCH --ntasks=1          # number of tasks",
-        "#SBATCH --cpus-per-task=%i  # number of CPUs" % max(int(NUM_SLAVES / 10),1),
+        "#SBATCH --cpus-per-task=%i  # number of CPUs" % max(int(NUM_SLAVES / 5),1),
         "#SBATCH --overcommit        # allow many tasks on one CPU",
         "#SBATCH --mem=%i  # memory/cpu (in MB)" % (int(MEM_PER_SLAVE) * int(NUM_SLAVES / 5) + int(MEM_MASTER)),
         "#SBATCH --profile task",
