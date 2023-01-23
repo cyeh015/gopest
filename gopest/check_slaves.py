@@ -250,18 +250,19 @@ def export_xls(data):
         ws.write(i, j, c)
 
     for sln,sl in data.items():
-        i += 1
-        j = 0
-        ws.write(i, j, sln)
-        for p in (phis + others + regs):
-            j += 1
-            if p in sl['obj-fn']:
-                ws.write(i, j, sl['obj-fn'][p])
-        for r in runcs:
-            j += 1
-            rn,sn = r.split('.')
-            if 'run' in sl and rn in sl['run'] and sn in sl['run'][rn]:
-                ws.write(i, j, sl['run'][rn][sn])
+        if 'obj-fn' in sl:
+            i += 1
+            j = 0
+            ws.write(i, j, sln)
+            for p in (phis + others + regs):
+                j += 1
+                if p in sl['obj-fn']:
+                    ws.write(i, j, sl['obj-fn'][p])
+            for r in runcs:
+                j += 1
+                rn,sn = r.split('.')
+                if 'run' in sl and rn in sl['run'] and sn in sl['run'][rn]:
+                    ws.write(i, j, sl['run'][rn][sn])
     wb.save('goPESTslaves.xls')
 
 def init_slave(cfg, rt):
