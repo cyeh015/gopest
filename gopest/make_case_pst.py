@@ -102,9 +102,12 @@ def fixpcf_modelcmd(fpst):
         print('update_case_pst.py unable to proceed, restoring.')
         os.rename(fpst_bk, fpst)
 
-def fixpcf_parobs(fpst):
+def fixpcf_parobs(fpst, dopar=True, doobs=True):
     """ update PEST case file (.pst) with parameter and observation data
     """
+    if dopar is False and doobs is False:
+        return
+
     fpst_bk = fpst + '.backup'
     if not os.path.isfile(fpst):
         print('Error: %s does not exist.' % fpst)
@@ -117,22 +120,31 @@ def fixpcf_parobs(fpst):
         with open(fpst_bk,'r') as fin:
             pcf_text = fin.read()
 
-        par_data, n_par = get_lines('.pest_par_data')
-        obs_data, n_obs = get_lines('.pest_obs_data')
+        if dopar:
+            par_data, n_par = get_lines('.pest_par_data')
+            pcf_text = replace_section("* parameter data", "* observation groups",
+                pcf_text, par_data)
+            print('+++ found %i parameters' % n_par)
 
-        pcf_text = replace_section("* parameter data", "* observation groups",
-            pcf_text, par_data)
-        pcf_text = replace_section("* observation data", "* model command line",
-            pcf_text, obs_data)
+            # replace the count of parameters
+            def replace_par_cnts(orig):
+                """ first two number is n_par and n_obs """
+                nums = orig.split()
+                return ' '.join([str(n_par)] + nums[1:])
+            pcf_text = replace_nth_line(pcf_text, 4, replace_par_cnts)
 
-        print('+++ found %i parameters and %i observations' % (n_par, n_obs))
+        if doobs:
+            obs_data, n_obs = get_lines('.pest_obs_data')
+            pcf_text = replace_section("* observation data", "* model command line",
+                pcf_text, obs_data)
+            print('+++ found %i observations' % n_obs)
 
-        # replace the count of parameters and observations
-        def replace_par_obs_cnts(orig):
-            """ first two number is n_par and n_obs """
-            nums = orig.split()
-            return ' '.join([str(n_par), str(n_obs)] + nums[2:])
-        pcf_text = replace_nth_line(pcf_text, 4, replace_par_obs_cnts)
+            # replace the count of parameters
+            def replace_obs_cnts(orig):
+                """ first two number is n_par and n_obs """
+                nums = orig.split()
+                return ' '.join(nums[:1] + [str(n_obs)] + nums[2:])
+            pcf_text = replace_nth_line(pcf_text, 4, replace_obs_cnts)
 
         with open(fpst, 'w') as fout:
             fout.write(pcf_text)
@@ -169,7 +181,7 @@ def copy_model_files():
 def make_case_cli(argv=[]):
     """ runs goPEST to set up par and obs entries """
     for a in argv[1:]:
-        if a not in ['--no-copy']:
+        if a not in ['--no-copy', '--no-par', '--no-obs']:
             raise Exception('Unrecognised option "%s".' % a)
     if '--no-copy' in argv:
         print('+++ use existing model files')
@@ -177,16 +189,23 @@ def make_case_cli(argv=[]):
         print('+++ copy from original model files')
         copy_model_files()
 
-    print('+++ running goPEST to get par and obs')
     fgeo = runtime['filename']['geom']
     fdato = runtime['filename']['dat_orig']
     fdats = runtime['filename']['dat_seq']
 
-    print('  gopestpar', fdato, 'pest_model.tpl', '.pest_par_data')
-    generate_params_and_tpl(fdato, 'pest_model.tpl', '.pest_par_data')
+    dopar = False
+    if '--no-par' not in argv:
+        print('+++ running goPEST to get par')
+        print('  gopestpar', fdato, 'pest_model.tpl', '.pest_par_data')
+        generate_params_and_tpl(fdato, 'pest_model.tpl', '.pest_par_data')
+        dopar = True
 
-    print('  gopestobs', fgeo, fdats[-1], 'pest_model.ins', '.pest_obs_data')
-    generate_obses_and_ins(fgeo, fdats[-1], 'pest_model.ins', '.pest_obs_data')
+    doobs = False
+    if '--no-obs' not in argv:
+        print('+++ running goPEST to get obs')
+        print('  gopestobs', fgeo, fdats[-1], 'pest_model.ins', '.pest_obs_data')
+        generate_obses_and_ins(fgeo, fdats[-1], 'pest_model.ins', '.pest_obs_data')
+        doobs = True
 
     # unfortunately I need to use 'real_model_original_pr.dat' here because it
     # has many GENERs that may not exist in natural state, while still being
@@ -196,7 +215,7 @@ def make_case_cli(argv=[]):
 
     # edit them into PEST case control file
     fpst = config['pest']['case-name'] + '.pst'
-    fixpcf_parobs(fpst)
+    fixpcf_parobs(fpst, dopar=dopar, doobs=doobs)
     fixpcf_modelcmd(fpst)
 
 
