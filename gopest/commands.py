@@ -34,8 +34,6 @@ Important files for goPEST to work:
 University of Auckland, 2012, 2022
 """
 
-import gopest.common
-
 def gopest_cli():
     print(title)
     argc = len(sys.argv)
@@ -45,6 +43,8 @@ def gopest_cli():
         if sys.argv[1] == 'help':
             print(version + hlp)
         else:
+            # NOTE loading gopest.common checks goPESTconfig.toml
+            import gopest.common
             import gopest.par
             import gopest.obs
             import gopest.pest_model
