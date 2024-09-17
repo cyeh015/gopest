@@ -1,3 +1,4 @@
+gopest/_version.py
 *.pyc
 build/
 dist/

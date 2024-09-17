@@ -1,12 +1,13 @@
 import sys
-from setuptools_scm import get_version
+
+from gopest import __version__
 
 title = """
 goPEST - Interfacing PEST with Waiwera and (AU)TOUGH2 simulators
 """
 
 version = """Version: (%s)
-""" % get_version(root='..', relative_to=__file__)
+""" % __version__
 
 hlp = """
 Usage: gopest COMMAND [ARGUMENTS]
