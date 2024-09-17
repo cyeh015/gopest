@@ -63,7 +63,7 @@ class permeability_1_byrock(ParDef):
         dat.grid.rocktype[name].permeability[0] = value
 
     def find_names_aut2(self, dat, pattern):
-        pattern = re.compile(name)
+        pattern = re.compile(pattern)
         return [r.name for r in dat.grid.rocktypelist if pattern.match(r.name)]
 
     def get_waiwera(self, dat, name):
@@ -88,7 +88,7 @@ class permeability_2_byrock(ParDef):
         dat.grid.rocktype[name].permeability[1] = value
 
     def find_names_aut2(self, dat, pattern):
-        pattern = re.compile(name)
+        pattern = re.compile(pattern)
         return [r.name for r in dat.grid.rocktypelist if pattern.match(r.name)]
 
     def get_waiwera(self, dat, name):
@@ -113,7 +113,7 @@ class permeability_3_byrock(ParDef):
         dat.grid.rocktype[name].permeability[2] = value
 
     def find_names_aut2(self, dat, pattern):
-        pattern = re.compile(name)
+        pattern = re.compile(pattern)
         return [r.name for r in dat.grid.rocktypelist if pattern.match(r.name)]
 
     def get_waiwera(self, dat, name):
@@ -138,7 +138,7 @@ class porosity_byrock(ParDef):
         dat.grid.rocktype[name].porosity = value
 
     def find_names_aut2(self, dat, pattern):
-        pattern = re.compile(name)
+        pattern = re.compile(pattern)
         return [r.name for r in dat.grid.rocktypelist if pattern.match(r.name)]
 
     def get_waiwera(self, dat, name):
