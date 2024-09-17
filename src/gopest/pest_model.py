@@ -34,10 +34,10 @@ from gopest.common import config
 from gopest.common import runtime
 
 def get_master_dir():
-    if config['mode'] != 'local':
-        with open('_master_dir', 'r') as f:
-            line = f.readlines()[0].strip()
-            return line
+    # if config['mode'] != 'local':
+    with open('_master_dir', 'r') as f:
+        line = f.readlines()[0].strip()
+        return line
 
 def get_pest_dir():
     with open('_pest_dir', 'r') as f:
@@ -200,7 +200,10 @@ def main_cli(argv=[]):
     else:
         waiwera = False
 
-    local = config['mode'] == 'local'
+    # probably should be invoked from within gopest?
+    # local = config['pest']['mode'] == 'local'
+    local = False
+
     skiprun = config['model']['skip']
     skippr = config['model']['skip-pr']
 
