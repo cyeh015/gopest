@@ -6,20 +6,24 @@ from mulgrids import *
 from t2data import *
 from t2listing import *
 
-TESTDIR = 'data'
+TESTDIR = './data'
 
 class TestObsDefs(unittest.TestCase):
     """ Test goPESTobs type by type, from users perspective. """
     def setUp(self):
-        self.geo = mulgrid("./%s/gwai6307_06.dat" % TESTDIR)
-        self.dat = t2data("./%s/wai6307ns_021.dat" % TESTDIR)
-        self.lst = t2listing("./%s/wai6307ns_021.listing" % TESTDIR)
+        self.original_dir = os.getcwd()
+        os.chdir(TESTDIR)
+
+        self.geo = mulgrid("./gwai6307_06.dat")
+        self.dat = t2data("./wai6307ns_021.dat")
+        self.lst = t2listing("./wai6307ns_021.listing")
 
     def tearDown(self):
         del self.geo
         del self.dat
         self.lst.close()
         del self.lst
+        os.chdir(self.original_dir)
 
     def test_totalheat_modelresult(self):
         """ totalheat should handle fixed/unfixed name even with regular expression """
@@ -77,7 +81,7 @@ class FullTest_goPESTobs(unittest.TestCase):
     """ Test running goPESTobs.py as an app, and check basic function """
     def setUp(self):
         self.original_dir = os.getcwd()
-        os.chdir('./%s/' % TESTDIR)
+        os.chdir(TESTDIR)
 
     def tearDown(self):
         os.chdir(self.original_dir)

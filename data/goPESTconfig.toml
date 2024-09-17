@@ -1,0 +1,30 @@
+[model]
+skip = false # skips actual simulation, existing model output is used
+skip-pr = false
+silent = true
+sequence = ['ns', 'pr']
+
+[model.original]
+# these original model files will be renamed to goPEST's internal convention,
+# which is usually something like real_model_xx, where xx is the sequence name.
+
+# specify at least Mulgrid geometry file here, needs .msh etc if running Waiwera
+geometry-files = ['gwai6307_06.dat']
+incon-file = 'raw/NaturalState/waiOH68954_NS_486_incon.h5'
+ns-input-file = 'raw/NaturalState/waiOH68954_NS_486.json'
+pr-input-file = 'raw/Production/waiOH68954_PR_486.json'
+
+# optional original output file, useful for debug
+ns-output-file = 'raw/NaturalState/waiOH68954_NS_486.h5'
+pr-output-file = 'raw/Production/waiOH68954_PR_486.h5'
+
+[simulator]
+input-type = "aut2" # "waiwera" or "aut2"
+output-type = "listing" # "listing" or "h5", will always be "h5" if input-type = "waiwera"
+
+executable = 'autough2'
+# "waiwera": local native waiwera, installed in path
+# "waiwera-dkr": running locally using Docker with pywaiwera installed
+# "waiwera-Maui": calling submit_beopest.py and use Maui
+# "waiwera-Mahuika": calling submit_beopest.py and use Mahuika
+
