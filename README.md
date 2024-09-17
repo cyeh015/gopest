@@ -57,6 +57,10 @@ Several tasks were performed by the `init` command:
 
 ```python -m pip install -e /path/to/repo/root```
 
+- run tests at the root of the repo:
+
+```python -m pytest```
+
 - generalised model sequence runner? now loads user goPESTuser.py, but internal needs to generalise to have more than two run sequence
 
 - in run_ns_pr, code shouldn't worry about nesi/cluster related things, maybe
