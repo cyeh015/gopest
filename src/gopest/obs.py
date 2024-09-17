@@ -14,6 +14,7 @@ from gopest.common import merge_dols
 from gopest import obs_def
 
 from gopest.utils.waiwera_listing import wlisting
+from gopest.utils.t2listingh5 import t2listingh5
 
 OBS_USER_FUNC = dict(inspect.getmembers(obs_def,inspect.isfunction))
 OBS_ALIAS = TwoWayDict(obs_def.shortNames)

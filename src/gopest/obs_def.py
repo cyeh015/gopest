@@ -47,9 +47,9 @@ else:
     sim = 'aut2'
 FIELD = {
     'aut2': {
-        'temp': 'Temperatu',
+        'temp': 'Temperature',
         'pres': 'Pressure',
-        'pco2': 'CO2 partial pres',
+        'pco2': 'CO2 partial pressure',
         'rate': 'Generation rate',
         'enth': 'Enthalpy',
     },
