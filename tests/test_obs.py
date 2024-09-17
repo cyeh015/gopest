@@ -6,7 +6,7 @@ from mulgrids import *
 from t2data import *
 from t2listing import *
 
-TESTDIR = './data'
+TESTDIR = './tests/data'
 
 class TestObsDefs(unittest.TestCase):
     """ Test goPESTobs type by type, from users perspective. """

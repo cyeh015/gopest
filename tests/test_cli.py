@@ -2,7 +2,7 @@ import unittest
 import subprocess
 import os
 
-TESTDIR_EMPTY = './data/test_empty_dir'
+TESTDIR_EMPTY = './tests/data/test_empty_dir'
 
 class TestCLI_NoConfig(unittest.TestCase):
     def setUp(self):
