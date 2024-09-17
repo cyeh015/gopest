@@ -21,9 +21,8 @@ try:
     with open(ftoml, 'r') as f:
         config = tomlkit.load(f)
 except FileNotFoundError:
-    print("Error! Config file '%s' is not found in current (working) directory:" % ftoml)
+    print("Warning! Config file '%s' is not found in current (working) directory:" % ftoml)
     print("    %s" % os.getcwd())
-    print("A valid configuration file is required for goPEST to work.")
     ans = input('Do you want goPEST to create a default file? (y/n) ')
     if 'y' in ans.lower():
         default_ftoml = resources.files('gopest.data') / ftoml
@@ -33,6 +32,7 @@ except FileNotFoundError:
             print("Existing...")
             exit(0)
     else:
+        print("Error! A valid configuration file is required for goPEST to work.")
         print('Existing...')
         exit(1)
 
