@@ -54,12 +54,15 @@ class wlisting(object):
             with open(fjson, 'r') as f:
                 self.wjson = json.load(f)
         else:
-            self.wjson = json
+            self.wjson = fjson
         self._h5 = h5py.File(filename, 'r')
         self.filename = filename
         self.simulator = 'waiwera'
         self.size_check = size_check # raise Exception if number of block does not match geo
         self.setup()
+
+    def close(self):
+        self._h5.close()
 
     def setup(self):
         self.cell_idx = self._h5['cell_index'][:,0]
@@ -69,7 +72,7 @@ class wlisting(object):
         ### checks:
         nh5 = len(self.cell_idx)
         if self.geo is not None:
-            # print('wlisting.element: uses mulgrid block name (str) as key.')
+            print('wlisting.element: uses mulgrid block name (str) as key.')
             nb = self.geo.num_blocks - self.geo.num_atmosphere_blocks
             if self.size_check and nh5 != nb:
                 msg = 'HDF5 result %s has %i cells different from geometry %s (%i excl. atmosphere blocks)' % (
@@ -87,7 +90,7 @@ class wlisting(object):
                 blocks += ['     '+str(i) for i in range(nh5 - nb)]
                 w_blocks += ['     '+str(i) for i in range(nh5 - nb)]
         else:
-            # print('wlisting.element: uses waiwera natural index (as str) as key.')
+            print('wlisting.element: uses waiwera natural index (as str) as key.')
             blocks = [str(i) for i in range(nh5)]
             w_blocks = blocks
         ### element table
@@ -105,7 +108,7 @@ class wlisting(object):
             self.face_idx = []
             self.face_idx_dir = []
             if self.geo is not None:
-                # print('wlisting.connection: tuple of mulgrid block names (str, str) as key.')
+                print('wlisting.connection: tuple of mulgrid block names (str, str) as key.')
                 face_keys = self.geo.block_connection_name_list
                 # w_boundary is a list of dict, in the order of wjson boundaries, each dict has key
                 # of block1, gives name of b2.
@@ -172,7 +175,7 @@ class wlisting(object):
                         msg += '\nMulgrid connection name %s not found in Waiwera H5 output.' % str(c)
                         raise Exception(msg)
             else:
-                # print('wlisting.connection: tuple of natural cell indices (as str, as str) as key.')
+                print('wlisting.connection: tuple of natural cell indices (as str, as str) as key.')
                 # keeps whatever order is in h5, NOTE the order is unpredictable
                 face_keys = [(str(i), str(j)) for i,j in zip(cid1, cid2)]
                 self.face_idx = list(range(len(cid1)))
@@ -193,7 +196,7 @@ class wlisting(object):
                 if 'source' in self.wjson and len(self.wjson['source']) == len(self.source_idx):
                     if all(['name' in s for s in self.wjson['source']]) and all(['cell' in s for s in self.wjson['source']]):
                         # each source has a name, each source has a single cell
-                        # print('wlisting.generation: detects matching Waiwera input JSON and HDF5 source_fields, use (block name, source name) as key.')
+                        print('wlisting.generation: detects matching Waiwera input JSON and HDF5 source_fields, use (block name, source name) as key.')
                         cid = [w_blocks[s['cell']] for s in self.wjson['source']]
                         gid = [str(s['name']) for s in self.wjson['source']]
                         source_keys = list(zip(cid, gid))
@@ -203,7 +206,7 @@ class wlisting(object):
                         if 'name' in s:
                             self.source_name_index[s['name']] = i
             if source_keys is None:
-                # print('wlisting.generation: use source index (as str) as key.')
+                print('wlisting.generation: use source index (as str) as key.')
                 # use source index (as str) as key
                 source_keys = [str(i) for i in range(len(self.source_idx))]
                 table = listingtable(cols, source_keys, num_keys=1)
@@ -248,8 +251,6 @@ class wlisting(object):
             if tbl == 'e':
                 if isinstance(b, str):
                     bi = self.geo.block_name_index[b]
-                elif isinstance(b, unicode):
-                    bi = self.geo.block_name_index[str(b)]
                 elif isinstance(b, int):
                     bi = b
                 else:
@@ -506,7 +507,7 @@ class test_medium(unittest.TestCase):
 
         # should spit out an exception about not supporting atmosphere blocks
         self.assertRaises(Exception, self.lst.history, ('e', 0, 'fluid_temperature'))
-        self.assertRaisesRegexp(Exception, 'atmosphere', self.lst.history, ('e', 0, 'fluid_temperature'))
+        self.assertRaisesRegex(Exception, 'atmosphere', self.lst.history, ('e', 0, 'fluid_temperature'))
 
 class test_medium_multiple_cpu(test_medium):
     def setUp(self):
@@ -577,10 +578,10 @@ if __name__ == '__main__':
     # geo = mulgrid('gLihir_v7_NS.dat')
     # init_time = time.time()
     # lst = wlisting('Lihir_v7_SP_NS_060_wai.h5', geo)
-    # print '%.2f sec' % (time.time() - init_time)
+    # print('%.2f sec' % (time.time() - init_time))
     # init_time = time.time()
     # lst.index = 1
-    # print '%.2f sec' % (time.time() - init_time)
+    # print('%.2f sec' % (time.time() - init_time))
 
 
 
