@@ -1,13 +1,14 @@
 import os
 import os.path
-import tomlkit
 import string
+import importlib.resources as resources
+import shutil
 
 # Access nested dictionary items via a list of keys
 from functools import reduce  # forward compatibility for Python 3
 import operator
 
-from gopest.defaults import default_cfg
+import tomlkit
 
 
 """ this allows gopest.common.config to be used directly, eg.
@@ -20,11 +21,14 @@ try:
     with open(ftoml, 'r') as f:
         config = tomlkit.load(f)
 except FileNotFoundError:
-    print("Error! Config file '%s' is not found in %s" % (ftoml, os.getcwd()))
+    print("Error! Config file '%s' is not found in current (working) directory:" % ftoml)
+    print("    %s" % os.getcwd())
+    print("A valid configuration file is required for goPEST to work.")
     ans = input('Do you want goPEST to create a default file? (y/n) ')
     if 'y' in ans.lower():
-        with open(ftoml, 'w') as f:
-            f.write(default_cfg)
+        default_ftoml = resources.files('gopest.data') / ftoml
+        with resources.as_file(default_ftoml) as f:
+            shutil.copyfile(f, ftoml)
             print("Config file '%s' created, please review and re-run gopest." % ftoml)
             print("Existing...")
             exit(0)
