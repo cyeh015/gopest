@@ -53,6 +53,10 @@ Several tasks were performed by the `init` command:
 
 ## Development notes
 
+- install an editable version of goPEST:
+
+```python -m pip install -e /path/to/repo/root```
+
 - generalised model sequence runner? now loads user goPESTuser.py, but internal needs to generalise to have more than two run sequence
 
 - in run_ns_pr, code shouldn't worry about nesi/cluster related things, maybe

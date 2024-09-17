@@ -36,10 +36,13 @@ url = "https://github.com/cyeh015/gopest"
 
 [tool.setuptools_scm]
 # this allows pip install to create proper version in the metadata
-version_file = "gopest/_version.py"
+version_file = "src/gopest/_version.py"
 
-[tool.setuptools.packages.find]
-exclude = ["tests"]
+# [tool.setuptools]
+# package-dir = {"" = "src"}
+
+# [tool.setuptools.packages.find]
+# exclude = ["tests"]
 
 [project.scripts]
 gopest = "gopest.commands:gopest_cli"

@@ -1,4 +1,4 @@
-gopest/_version.py
+src/gopest/_version.py
 *.pyc
 build/
 dist/
