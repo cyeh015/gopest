@@ -6,6 +6,7 @@ from gopest.common import runtime
 
 import os
 import re
+import importlib.resources as resources
 import shutil
 
 def replace_section(begin_sec, end_sec, pcf_text, repl):
@@ -23,7 +24,7 @@ def replace_section(begin_sec, end_sec, pcf_text, repl):
 def get_lines(filename):
     """ return all non-empty lines froma file as a single string, with a line
     count. """
-    f = open(filename, 'rU')
+    f = open(filename, 'r')
     lines, cnt = '', 0
     for line in f:
         if line.strip():
@@ -215,6 +216,22 @@ def make_case_cli(argv=[]):
 
     # edit them into PEST case control file
     fpst = config['pest']['case-name'] + '.pst'
+
+    # checks if fpst exists, otherwise ask user if they want a default one
+    if not os.path.isfile(fpst):
+        print("Warning! PEST case file '%s' is not found in current (working) directory:" % fpst)
+        print("    %s" % os.getcwd())
+        ans = input('Do you want goPEST to create a default case file? (y/n) ')
+        if 'y' in ans.lower():
+            default_fpst = resources.files('gopest.data') / 'case.pst'
+            with resources.as_file(default_fpst) as f:
+                shutil.copyfile(f, fpst)
+                print("Case file '%s' created, please review and re-run gopest init." % fpst)
+        else:
+            print("Error! A template PEST case (.pst) file is required for goPEST to work.")
+            print('Existing...')
+            exit(1)
+
     fixpcf_parobs(fpst, dopar=dopar, doobs=doobs)
     fixpcf_modelcmd(fpst)
 
