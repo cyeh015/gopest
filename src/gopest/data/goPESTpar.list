@@ -1,0 +1,95 @@
+# This is an example input file for goPESTpar.py 
+#
+# goPESTpar.py uses the content of this file to generate:
+# 1. the * parameter data section for the PEST control file.
+# 2. the template file (.tpl) to be used by PEST
+#
+# In PEST, each line of * parameter data should be:
+# PARNME PARTRANS PARCHGLIM PARVAL1 PARLBND PARUBND PARGP SCALE OFFSET DERCOM PARTIED
+#
+
+[Defaults]
+# default names of parameter data can be set by using 'PARNME = '
+# but to be effective, it has to be exactly two character long,
+# otherwise it will be overwritten with the default short alias 
+# of the parameter type, which is controlled in goPESTpar_def.py
+
+
+
+permeability_1_byrock:
+PARTRANS = 'log'
+PARGP = 'k1'
+PARLBND = 0.01e-15
+PARUBND = 4500.0e-15
+
+permeability_2_byrock:
+PARTRANS = 'log'
+PARGP = 'k2'
+PARLBND = 0.01e-15
+PARUBND = 4500.0e-15
+
+#Vertical permeability
+permeability_3_byrock:
+PARTRANS = 'log'
+PARGP = 'k3'
+PARLBND = 0.01e-15
+PARUBND = 3000.0e-15
+
+#Porosity
+porosity_byrock:
+PARTRANS = 'log'
+PARGP = 'por'
+PARLBND = 0.01
+PARUBND = 0.5
+
+massgener_rate:
+PARTRANS = 'log'
+PARGP = 'upflow'
+PARLBND = 0.01
+PARUBND = 50.0
+
+upflow_rech:
+PARTRANS = 'log'
+PARGP = 'rech'
+PARLBND = 1.0e-8
+PARUBND = 1.0e-5
+
+relative_perm_1:
+PARTRANS = 'log'
+PARGP = 'rpcap'
+PARLBND = 0.1
+PARUBND = 0.9
+
+
+[Param]
+ForEach: permeability_1_byrock,permeability_2_byrock,permeability_3_byrock
+ForEach: Rocktype
+'((?!ATMOS).....)'
+# match all rock types but not ATMOS, using look-around
+
+
+[END]
+
+
+[Param]
+ForEach: porosity_byrock
+ForEach: Rocktype
+'((?!ATMOS).....)'
+# match all rock types but not ATMOS, using look-around
+
+
+[Param]
+ForEach: massgener_rate
+ForEach: Generator
+'SO...'
+
+[Param]
+ForEach: upflow_rech
+ForEach: ConfigRechCoeff
+'.+'
+
+[Param]
+ForEach: relative_perm_1
+ForEach: NA
+'rp1'
+

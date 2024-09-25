@@ -10,31 +10,35 @@ import operator
 
 import tomlkit
 
+def check_required(finput, name, fdefault=None):
+    if not os.path.isfile(finput):
+        print("\nWarning! %s file '%s' is not found in current working directory:" % (name, finput))
+        print("    %s\n" % os.getcwd())
+        ans = input('Do you want goPEST to create a default file? (y/n) ')
+        if 'y' in ans.lower():
+            if fdefault is None:
+                fdefault = finput
+            default_finput = resources.files('gopest.data') / fdefault
+            with resources.as_file(default_finput) as f:
+                shutil.copyfile(f, finput)
+                print("Default %s file '%s' created, please review and re-run " \
+                      "command 'gopest init'." % (name, finput))
+            exit(0)
+        else:
+            print("Error! File '%s' is required for goPEST to work." % finput)
+            print('Existing...')
+            exit(1)
+
+
+check_required('goPESTconfig.toml', 'Configuration')
 
 """ this allows gopest.common.config to be used directly, eg.
         from gopest.common import config as cfg
         print(cfg['pest']['executable'])
         print(cfg['simulator']['executable'])
 """
-ftoml = 'goPESTconfig.toml'
-try:
-    with open(ftoml, 'r') as f:
-        config = tomlkit.load(f)
-except FileNotFoundError:
-    print("Warning! Config file '%s' is not found in current (working) directory:" % ftoml)
-    print("    %s" % os.getcwd())
-    ans = input('Do you want goPEST to create a default file? (y/n) ')
-    if 'y' in ans.lower():
-        default_ftoml = resources.files('gopest.data') / ftoml
-        with resources.as_file(default_ftoml) as f:
-            shutil.copyfile(f, ftoml)
-            print("Config file '%s' created, please review and re-run gopest." % ftoml)
-            print("Existing...")
-            exit(0)
-    else:
-        print("Error! A valid configuration file is required for goPEST to work.")
-        print('Existing...')
-        exit(1)
+with open('goPESTconfig.toml', 'r') as f:
+    config = tomlkit.load(f)
 
 """ this allows gopest.common.runtime to be used directly, eg.
         from gopest.common import runtime

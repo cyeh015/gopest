@@ -1,0 +1,793 @@
+#-------------------------------------------------------------------------------
+
+[ObservationType]
+temperature_thickness_json
+# temp_interp_thickness_json
+
+[DataTimeOffset]
+1953.00 * 60.0 * 60.0 * 24.0 * 365.25
+
+[Defaults]
+OBSNME = 'tt'
+OBGNME = 'temp'
+
+# this is used as a factor to be multiplied to the thickness of layer
+# default is 1.0
+WEIGHT = 3.5e-4
+
+[DataFilter]
+
+[Obs]
+data_temp_downhole.json
+'Temp_GGL1_2006_64.dat'
+# 'Temp_NM1.dat' # outside model
+# 'Temp_NM2.dat' # outside model
+# 'Temp_NM3.dat'
+# 'Temp_NM5.dat'
+# 'Temp_NM6.dat'
+# 'Temp_NM7.dat'
+# 'Temp_RK1_ns.dat'
+# 'Temp_RK2_ns.dat'
+# 'Temp_TH1_1964_60_Interp2012.dat'
+# 'TEMP_TH2_2004_466_thdb.dat'
+# 'Temp_TH3_1968_46_Interp2012.dat'
+# 'Temp_TH4_1973_53_Interp2012.dat'
+# 'Temp_TH9_2013_33.dat'
+# 'Temp_TH10_2013_33.dat'
+# 'Temp_TH11_2011_07.dat'
+# 'Temp_TH12_2013_58.dat'
+# 'Temp_TH13_2008_56_Interp2012.dat'
+# 'Temp_TH14_2009_27_Interp2012.dat'
+# 'Temp_TH17_2013_28.dat'
+# 'Temp_TH19_2011_73.dat'
+# 'Temp_WK19_1954_0_Interp2012.dat'
+# 'Temp_WK32_1984_123.dat'
+# 'Temp_WK33_1966_0_Interp2012.dat'
+# 'Temp_WK48_1968_12_historical.dat'
+# 'Temp_WK121_1972_77_Interp2012.dat'
+# 'Temp_WK218_1986_17.dat'
+# 'Temp_WK223_2013_55.dat'
+# 'Temp_WK224_2012_94.dat'
+# 'TEMP_WK226_1982_537.dat'
+# 'Temp_WK227_1970_0_Interp2012.dat'
+# 'Temp_WK247_2010_55_Interp2012.dat'
+# 'Temp_WK253_2009_41.dat'
+# 'Temp_WK259_2011_55.dat'
+# 'Temp_WK261_2012_65.dat'
+# 'Temp_WK270_2013_75.dat'
+# 'Temp_WK301_1984_48_Interp2012.dat'
+# 'Temp_WK315B_2013_29.dat'
+# 'Temp_WK317_2010_67.dat'
+# 'Temp_WK321_2013_12.dat'
+# 'Temp_WK401_2010_65.dat'
+# 'Temp_WK404_2010_65_Interp2012.dat'
+# 'Temp_WK409A_2012_29.dat'
+# 'Temp_WK410_2012_48.dat'
+# 'Temp_WK650_1995_75_Interp2012.dat'
+# 'Temp_WK684_2013_20.dat'
+
+
+
+
+[END]
+
+
+
+
+[ObservationType]
+target_time
+
+[Defaults]
+OBSNME = 'st'
+OBGNME = 'time'
+
+# set for 5 years for about 1000
+WEIGHT = 2.0e-7
+
+[Obs]
+# 0.2208E+10 # testing add 5 years
+0.2051E+10 
+
+#-------------------------------------------------------------------------------
+
+[ObservationType]
+pressure_block_average_json
+
+[DataTimeOffset]
+1953.00 * 60.0 * 60.0 * 24.0 * 365.25
+
+[Defaults]
+OBSNME = 'pp'
+OBGNME = 'press'
+WEIGHT = 2.00e-6
+_DESIRED_DATA_TIMES = [(1953.00+1.0*float(i)) for i in range(65)]
+_INTERP_LIMIT = 0.5
+ # 0.08 is gradient for 250 degC liquid water (bar/m)
+_P_GRADIENT = 0.08
+
+# [DataFilter]
+# time <= 2018.0
+
+[Obs]
+data_pressure_hist_wai_liq_2018.json
+'WK010'
+'WK012'
+'WK013'
+'WK019'
+'WK020'
+'WK022'
+'WK024'
+'WK026A'
+'WK026B'
+'WK027 (1)'
+'WK027 (2)'
+# 'WK028' # cause oscillation
+'WK029'
+'WK030'
+# 'WK031'
+'WK032'
+'WK033'
+'WK034'
+'WK035'
+'WK036'
+'WK038'
+'WK039'
+'WK043'
+'WK044'
+'WK046'
+'WK047'
+'WK048'
+'WK050'
+'WK053'
+'WK054'
+'WK055'
+'WK056'
+'WK057'
+'WK058'
+# 'WK059' # oscillation
+'WK060'
+'WK061'
+'WK062'
+'WK063'
+'WK066'
+'WK067 (1)'
+'WK067 (2)'
+'WK068'
+# 'WK069' # not in geometry file
+'WK070 (1)'
+'WK070 (2)'
+'WK070 (3)'
+'WK071'
+'WK072'
+'WK074'
+'WK075'
+'WK076 (1)'
+'WK076 (2)'
+'WK078'
+'WK080'
+'WK081'
+'WK082'
+'WK083'
+'WK086'
+'WK088'
+'WK092'
+'WK096'
+'WK101'
+'WK103'
+'WK105'
+'WK107'
+'WK108'
+'WK110'
+'WK116'
+'WK118 (1)'
+'WK118 (2)'
+'WK119'
+'WK121 Survey'
+'WK121 Tubing'
+'WK122'
+'WK124A'
+'WK208'
+'WK210 (1)'
+'WK210 (2)'
+'WK212'
+'WK213 (1)'
+'WK213 (2) M'
+'WK214'
+'WK215 (1)'
+'WK215 (2)'
+'WK216'
+'WK217'
+'WK218 Survey (1)'
+'WK218 Survey (2)'
+'WK218 Survey (3)'
+# 'WK218 Tubing (1)' # not compatible with surrounding?
+# 'WK218 Tubing (2)'
+'WK219'
+'WK220'
+'WK221'
+'WK222 (1)'
+'WK222 (2)'
+'WK223'
+'WK224'
+'WK226 (1)'
+'WK226 (2)'
+'WK226 (3)'
+'WK227 (1)'
+'WK227 (2)'
+'WK229 (1)'
+'WK229 (2)'
+'WK230'
+'WK231'
+'WK235'
+'WK239 (1)'
+'WK239 (2)'
+'WK239 (3)'
+'WK242'
+'WK244'
+'WK256 (1)'
+'WK256 (2)'
+'WK257A'
+'WK267A'
+'WK270'
+'WK302'
+'WK304'
+'WK305'
+'WK306'
+'WK307'
+'WK310 (1)'
+'WK310 (2)'
+'WK311'
+'WK312'
+'WK313'
+'WK314'
+'WK316'
+'WK317'
+'WK318'
+'WK680'
+'WK682'
+'WK683'
+'WK684'
+'WK685'
+'WK686'
+# important ?
+'WK207 (1)'
+
+[Defaults]
+WEIGHT = 3.00e-6
+
+[Obs]
+data_pressure_hist_wai_liq_2018.json
+'WK263'
+'WK247'
+'WK261'
+'WK253'
+'WK271'
+'WK264'
+'WK259'
+'WK258'
+'WK207 (2)'
+'WK268'
+'WK269'
+'WK272'
+'WK254A'
+'WK266'
+'WK245'
+'WK255'
+'WK265'
+'WK123A'
+'WK260'
+'WK243'
+
+[Defaults]
+WEIGHT = 4.50e-6
+
+[Obs]
+data_pressure_hist_wai_liq_2018.json
+'WK303'
+'WK301'
+'WK308'
+'WK309'
+'WK321'
+'WK402 Survey'
+'WK401'
+'WK402 Tubing'
+'WK403'
+'WK408'
+'WK409A'
+'WK410'
+
+
+[Defaults]
+WEIGHT = 9.00e-6
+
+[Obs]
+data_pressure_hist_th_liq_2018.json
+'TH12'
+
+[Defaults]
+WEIGHT = 4.50e-6
+
+[Obs]
+data_pressure_hist_th_liq_2018.json
+'TH06'
+'TH07'
+'TH08'
+'TH11'
+'TH13'
+'TH14'
+'TH15'
+'TH18'
+'TH19'
+'TH20'
+'THM13 Survey'
+'THM13 Tubing'
+'THM16'
+'THM16 Tubing'
+'THM17 Survey'
+'THM17 Tubing'
+
+[Defaults]
+WEIGHT = 2.00e-6
+
+[Obs]
+data_pressure_hist_th_liq_2018.json
+'TH01'
+'TH02'
+# 'TH02W'
+'TH03'
+'TH04'
+'TH05'
+'TH09'
+'TH10'
+'TH16'
+'TH17'
+'TH21 Tubing'
+'TH21 surveys'
+'THM01'
+'THM02'
+'THM03'
+'THM04'
+'THM09'
+'THM11'
+'THM12'
+'THM14'
+'THM15'
+'THM19'
+'THM20'
+'THM21'
+'THM22 Survey'
+'THM22 Tubing'
+
+[Defaults]
+OBSNME = 'pv'
+OBGNME = 'press'
+WEIGHT = 2.00e-6
+_DESIRED_DATA_TIMES = [(1953.00+1.0*float(i)) for i in range(65)]
+_INTERP_LIMIT = 0.5
+ # 0.08 is gradient for 250 degC liquid water (bar/m)
+_P_GRADIENT = 0.00
+
+# [DataFilter]
+# time <= 2018.0
+
+[Obs]
+data_pressure_hist_wai_vp_2018.json
+'WK205'
+'WK210'
+'WK214'
+'WK232'
+'WK233'
+'WK234'
+'WK235'
+'WK237'
+'WK238'
+'WK239'
+'WK240'
+'WK241'
+'WK249'
+'WK249 WHP'
+'WK250'
+'WK251'
+'WK252'
+
+
+#-------------------------------------------------------------------------------
+
+
+[ObservationType]
+enthalpy_json
+
+[DataTimeOffset]
+1953.00 * 60.0 * 60.0 * 24.0 * 365.25
+
+[Defaults]
+OBSNME = 'ee'
+OBGNME = 'enth'
+WEIGHT = 1.00e-6
+_DESIRED_DATA_TIMES = [(1953.00+1.0*float(i)) for i in range(65)]
+_INTERP_LIMIT = 0.5
+
+# set this to increase or decrease weighting of start/end points in history
+# the middle of the data point will be kept as the set 'WEIGHT', then linearly
+# increases to the specified value here towards two ends. It can be either
+# larger than 1.0 or smaller than 1.0.
+# _ENDS_WEIGHT_FACTOR = 2.0
+
+# _GRADIENT_WEIGHT_FACTOR = 2.1
+
+# _WELL_TO_GENERS = 'data_well_geners.json'
+_REMOVE_ZEROS = True
+
+[DataFilter]
+time <= 2018.0
+
+[Obs]
+data_pr_hist.json
+# 'RK  1'
+# 'RK  6'
+# 'TH  2'
+# 'TH  6'
+# 'TH  7'
+# 'TH  8'
+# 'TH 13'
+# 'TH 14'
+# 'TH 15'
+# 'TH 16'
+# 'TH 19'
+# 'TH 20'
+'WA 26'
+'WB 26'
+'WK  4'
+'WK  8'
+'WK  9'
+'WK 11'
+'WK 12'
+'WK 13'
+'WK 14'
+'WK 15'
+'WK 16'
+'WK 17'
+'WK 18'
+'WK 19'
+'WK 20'
+'WK 21'
+'WK 22'
+'WK 23'
+'WK 24'
+'WK 25'
+'WK 26'
+'WK 27'
+'WK 28'
+'WK 29'
+'WK 30'
+'WK 31'
+'WK 37'
+'WK 38'
+'WK 39'
+'WK 40'
+'WK 41'
+'WK 42'
+'WK 43'
+'WK 44'
+'WK 45'
+'WK 46'
+'WK 47'
+'WK 48'
+'WK 49'
+'WK 50'
+'WK 52'
+'WK 53'
+'WK 55'
+'WK 56'
+'WK 57'
+'WK 58'
+'WK 59'
+'WK 60'
+'WK 61'
+# 'WK 62'
+'WK 63'
+'WK 65'
+'WK 66'
+'WK 67'
+'WK 68'
+'WK 70'
+'WK 71'
+'WK 72'
+'WK 73'
+'WK 74'
+'WK 75'
+'WK 76'
+'WK 78'
+'WK 80'
+'WK 81'
+'WK 82'
+'WK 83'
+'WK 86'
+'WK 88'
+'WK 92'
+'WK 96'
+'WK101'
+'WK103'
+'WK105'
+'WK107'
+'WK108'
+'WK109'
+'WK110'
+'WK116'
+'WK118'
+'WK119'
+'WK123'
+'WK124'
+'WK203'
+'WK204'
+'WK205'
+'WK206'
+'WK207'
+'WK210'
+'WK211'
+'WK212'
+'WK214'
+'WK215'
+'WK216'
+'WK217'
+'WK218'
+'WK219'
+'WK220'
+'WK221'
+'WK222'
+'WK228'
+'WK229'
+'WK232'
+'WK233'
+'WK234'
+'WK235'
+'WK236'
+'WK237'
+'WK238'
+'WK239'
+'WK240'
+'WK241'
+'WK242'
+'WK243'
+'WK244'
+'WK245'
+'WK247'
+'WK249'
+'WK250'
+'WK251'
+'WK252'
+'WK253'
+'WK254'
+'WK255'
+'WK256'
+'WK258'
+'WK259'
+'WK260'
+'WK261'
+'WK262'
+'WK263'
+'WK264'
+'WK265'
+'WK266'
+'WK267'
+'WK268'
+'WK269'
+# 'WK270' # yields no data
+# 'WK271' # yields no data
+# 'WK272' # yields no data
+# 'WK301'
+# 'WK303'
+# 'WK304'
+# 'WK305'
+# 'WK307'
+# 'WK308'
+# 'WK309'
+# 'WK310'
+# 'WK311'
+# 'WK312'
+# 'WK314'
+# 'WK316'
+# 'WK317'
+# 'WK318'
+# 'WK321'
+# 'WK401'
+# 'WK403'
+# 'WK404'
+# 'WK407'
+# 'WK408'
+# 'WK409'
+# 'WK410'
+'WK604'
+'WK605'
+'WK606'
+'WK607'
+'WK610'
+# 'WK650'
+# 'WK680'
+# 'WK681'
+# 'WK682'
+# 'WK683'
+
+
+#-------------------------------------------------------------------------------
+
+
+[ObservationType]
+boiling_json
+
+[DataTimeOffset]
+1953.00 * 60.0 * 60.0 * 24.0 * 365.25
+
+[Defaults]
+OBSNME = 'eb'
+OBGNME = 'boilp'
+WEIGHT = 1.10e-6
+_DESIRED_DATA_TIMES = [(1953.00+1.0*float(i)) for i in range(65)]
+_INTERP_LIMIT = 0.5
+_BOILING_ABOVE_ENTH = 1400000.0
+# _WELL_TO_GENERS = 'data_well_geners_boiling.json'
+
+[DataFilter]
+
+
+[Obs]
+data_pr_hist.json
+# 'TH  2'
+# 'TH  6'
+# 'TH  7'
+# 'TH  8'
+# 'TH 13'
+# 'TH 14'
+# 'TH 15'
+# 'TH 16'
+# 'TH 19'
+# 'TH 20'
+# 'WA 26'
+# 'WB 26'
+'WK  4'
+'WK  8'
+'WK  9'
+# 'WK 11'
+# 'WK 12'
+# 'WK 13'
+'WK 14'
+'WK 15'
+'WK 16'
+# 'WK 17'
+'WK 18'
+'WK 19'
+# 'WK 20'
+'WK 21'
+'WK 22'
+'WK 23'
+# 'WK 24'
+'WK 25'
+'WK 26'
+'WK 27'
+# 'WK 28'
+# 'WK 29'
+# 'WK 30'
+# 'WK 31'
+'WK 37'
+'WK 38'
+# 'WK 39'
+'WK 40'
+'WK 41'
+'WK 42'
+'WK 43'
+# 'WK 44'
+'WK 45'
+# 'WK 46'
+# 'WK 47'
+# 'WK 48'
+# 'WK 49'
+# 'WK 50'
+'WK 52'
+'WK 53'
+# 'WK 55'
+'WK 56'
+# 'WK 57'
+# 'WK 58'
+'WK 59'
+'WK 60'
+'WK 61'
+# 'WK 63'
+'WK 65'
+'WK 66'
+# 'WK 67'
+'WK 68'
+# 'WK 70'
+# 'WK 71'
+'WK 72'
+'WK 73'
+# 'WK 74'
+# 'WK 75'
+# 'WK 76'
+# 'WK 78'
+'WK 80'
+# 'WK 81'
+'WK 82'
+# 'WK 83'
+'WK 86'
+'WK 88'
+'WK 92'
+'WK 96'
+# 'WK101'
+'WK103'
+'WK105'
+# 'WK107'
+'WK108'
+'WK109'
+'WK110'
+# 'WK116'
+'WK118'
+'WK119'
+# 'WK123'
+# 'WK124'
+# 'WK203'
+# 'WK204'
+'WK205'
+'WK206'
+# 'WK207'
+# 'WK210'
+'WK211'
+# 'WK212'
+'WK214'
+'WK215'
+'WK216'
+'WK217'
+# 'WK218'
+'WK219'
+# 'WK220'
+# 'WK221'
+'WK222'
+'WK228'
+# 'WK229'
+'WK232'
+'WK233'
+'WK234'
+# 'WK235'
+'WK236'
+'WK237'
+'WK238'
+# 'WK239'
+'WK240'
+'WK241'
+'WK242'
+# 'WK243'
+# 'WK244'
+# 'WK245'
+# 'WK247'
+'WK249'
+'WK250'
+'WK251'
+'WK252'
+# 'WK253'
+'WK254'
+# 'WK255'
+# 'WK256'
+'WK258'
+# 'WK259'
+'WK260'
+# 'WK261'
+'WK262'
+# 'WK263' # probably not boiling
+# 'WK264'
+# 'WK265'
+# 'WK266'
+# 'WK267'
+# 'WK268'
+# 'WK269'
+# 'WK270'
+# 'WK271'
+# 'WK272'
+'WK604'
+'WK605'
+'WK606'
+'WK607'
+'WK610'
+
+
+
+
+

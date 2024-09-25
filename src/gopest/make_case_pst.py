@@ -3,6 +3,7 @@ from gopest.obs import generate_obses_and_ins
 
 from gopest.common import config
 from gopest.common import runtime
+from gopest.common import check_required
 
 import os
 import re
@@ -196,6 +197,8 @@ def make_case_cli(argv=[]):
 
     dopar = False
     if '--no-par' not in argv:
+        check_required('goPESTpar.list', 'Parameter list')
+
         print('+++ running goPEST to get par')
         print('  gopestpar', fdato, 'pest_model.tpl', '.pest_par_data')
         generate_params_and_tpl(fdato, 'pest_model.tpl', '.pest_par_data')
@@ -203,6 +206,8 @@ def make_case_cli(argv=[]):
 
     doobs = False
     if '--no-obs' not in argv:
+        check_required('goPESTobs.list', 'Observation list')
+
         print('+++ running goPEST to get obs')
         print('  gopestobs', fgeo, fdats[-1], 'pest_model.ins', '.pest_obs_data')
         generate_obses_and_ins(fgeo, fdats[-1], 'pest_model.ins', '.pest_obs_data')
@@ -217,24 +222,10 @@ def make_case_cli(argv=[]):
     # edit them into PEST case control file
     fpst = config['pest']['case-name'] + '.pst'
 
-    # checks if fpst exists, otherwise ask user if they want a default one
-    if not os.path.isfile(fpst):
-        print("Warning! PEST case file '%s' is not found in current (working) directory:" % fpst)
-        print("    %s" % os.getcwd())
-        ans = input('Do you want goPEST to create a default case file? (y/n) ')
-        if 'y' in ans.lower():
-            default_fpst = resources.files('gopest.data') / 'case.pst'
-            with resources.as_file(default_fpst) as f:
-                shutil.copyfile(f, fpst)
-                print("Case file '%s' created, please review and re-run gopest init." % fpst)
-        else:
-            print("Error! A template PEST case (.pst) file is required for goPEST to work.")
-            print('Existing...')
-            exit(1)
+    check_required(fpst, 'PEST Case', fdefault='case.pst')
 
     fixpcf_parobs(fpst, dopar=dopar, doobs=doobs)
     fixpcf_modelcmd(fpst)
-
 
 
 
