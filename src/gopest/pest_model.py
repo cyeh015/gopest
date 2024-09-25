@@ -179,6 +179,26 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
         copy2('pest_model.obf', master_dir + sep + 'pest_model.obf.' + get_slave_id())
 
 def main_cli(argv=[]):
+    """ the main purpose of run-pest-model is to be called by PEST.
+
+    PEST needs:
+    - pest_model.tpl
+    - pest_model.ins
+
+    When PEST wants a forward run, PEST
+    1. uses pest_model.tpl to generate: pest_model.dat
+    2. runs the command: gopest run-pest-model
+    3. uses pest_model.ins to read data from: pest_model.obf
+
+    under the hood, run-pest-model's job is to:
+    a. get parameters from pest_model.dat to construct real_model.dat
+    b. run actual simulation, which generates real_model.h5
+    c. converts real_model.h5 into pest_model.obf
+
+    a. is done by goPESTpar
+    b. is done by run-forward
+    c. is done by goPESTobs
+    """
     obsreref = False
     svda = False
     testup = False
