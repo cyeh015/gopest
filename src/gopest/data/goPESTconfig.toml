@@ -3,6 +3,7 @@
 [pest]
 dir = ""
 executable = "pest_hp"
+executable_agent = "agent_hp" # required if PEST_HP is used
 port = "24001"
 num_slaves = 2
 slave_dirs = ""

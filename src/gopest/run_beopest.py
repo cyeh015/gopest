@@ -2,10 +2,11 @@ import os
 import sys
 import shutil
 import time
-from subprocess import Popen
+from subprocess import Popen, DEVNULL
 from multiprocessing import cpu_count
 
 from gopest.common import config as cfg
+from gopest.common import runtime
 
 NUM_SLAVES = cfg['pest']['num_slaves']
 PST_NAME = cfg['pest']['case-name']
@@ -90,8 +91,18 @@ def run_cli(argv=[]):
     """ generate master and slave commands, copy files into slave directories,
     and launch them as process, wait until all finished.
     """
+    if "pest_hp" in BEOPEST.lower():
+        MASTER = BEOPEST
+        if PESTDIR:
+            AGENT = os.path.join(PESTDIR, cfg['pest']['executable_agent'])
+        else:
+            AGENT = cfg['pest']['executable_agent']
+    else:
+        MASTER = BEOPEST
+        AGENT = BEOPEST
+
     # each command is a tuple (args, other options), see subproces.Popen()
-    master = ([BEOPEST, PST_NAME, SWITCHES, '/h :%s' % PORT], {} )
+    master = ([MASTER, PST_NAME, SWITCHES, '/h :%s' % PORT], {} )
     slaves = []
     for i in range(NUM_SLAVES):
         s_dir = 'slave%i' % (i+1)
@@ -99,9 +110,10 @@ def run_cli(argv=[]):
             shutil.rmtree(s_dir)
         shutil.copytree('.', s_dir, ignore=ignore_dirs)
         slaves.append((
-            [BEOPEST, PST_NAME, '/h localhost:%s' % PORT],
+            [AGENT, PST_NAME, '/h localhost:%s' % PORT],
             {
                 'cwd': s_dir,
+                'stdout': DEVNULL,
             }))
 
     # start master, sleep a bit, then start all slaves
