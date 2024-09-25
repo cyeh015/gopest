@@ -16,7 +16,7 @@ Supported COMMANDs:
     help
     init [--no-copy][--no-par][--no-obs]    (make_case_pst)
     submit                                  (submit_beopest)
-xx  run                                     (run_beopest)
+    run                                     (run_beopest)
     par                                     (goPESTpar)
     obs                                     (goPESTobs)
     run-pest-model                          (pest_model)
@@ -51,6 +51,7 @@ def gopest_cli():
             import gopest.pest_model
             import gopest.run_ns_pr
             import gopest.submit_beopest
+            import gopest.run_beopest
             import gopest.make_case_pst
             import gopest.rename_latest_files
             import gopest.check_slaves
@@ -60,6 +61,7 @@ def gopest_cli():
                 'run-pest-model': gopest.pest_model.main_cli,
                 'run-forward': gopest.run_ns_pr.main_cli,
                 'submit': gopest.submit_beopest.submit_cli,
+                'run': gopest.run_beopest.run_cli,
                 'init': gopest.make_case_pst.make_case_cli,
                 'save-iter-files': gopest.rename_latest_files.rename_latest_files,
                 'check-slaves': gopest.check_slaves.check_slaves_cli,
