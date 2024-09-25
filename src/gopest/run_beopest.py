@@ -13,7 +13,7 @@ PST_NAME = cfg['pest']['case-name']
 PORT = cfg['pest']['port']
 SWITCHES = " ".join(cfg['pest']['switches'])
 
-TOUGH2 = "AUTOUGH2_5Dbeta" # specify absolute path if not in system path
+TOUGH2 = cfg['simulator']['executable']
 BEOPEST = cfg['pest']['executable']
 PESTDIR = cfg['pest']['dir']
 
@@ -100,6 +100,8 @@ def run_cli(argv=[]):
     else:
         MASTER = BEOPEST
         AGENT = BEOPEST
+
+    generate_comm_files()
 
     # each command is a tuple (args, other options), see subproces.Popen()
     master = ([MASTER, PST_NAME, SWITCHES, '/h :%s' % PORT], {} )
@@ -189,5 +191,4 @@ def generate_comm_files():
     write_to('_tough2', TOUGH2)
 
 if __name__ == '__main__':
-    generate_comm_files()
     run_cli()
