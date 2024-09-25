@@ -194,6 +194,9 @@ def make_case_cli(argv=[]):
     fgeo = runtime['filename']['geom']
     fdato = runtime['filename']['dat_orig']
     fdats = runtime['filename']['dat_seq']
+    fpst = config['pest']['case-name'] + '.pst'
+
+    check_required(fpst, 'PEST Case', fdefault='case.pst')
 
     dopar = False
     if '--no-par' not in argv:
@@ -218,11 +221,6 @@ def make_case_cli(argv=[]):
     # needed in observations, eg. Production gener's block, hopefully this is
     # okay because we usually don't need to get any actual values out of the
     # real_model_original_pr.dat model.
-
-    # edit them into PEST case control file
-    fpst = config['pest']['case-name'] + '.pst'
-
-    check_required(fpst, 'PEST Case', fdefault='case.pst')
 
     fixpcf_parobs(fpst, dopar=dopar, doobs=doobs)
     fixpcf_modelcmd(fpst)
