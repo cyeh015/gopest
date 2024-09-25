@@ -3,9 +3,9 @@
 [pest]
 dir = ""
 executable = "pest_hp"
-executable_agent = "agent_hp" # required if PEST_HP is used
+executable_agent = "agent_hp"
 port = "24001"
-num_slaves = 2
+num_slaves = 1
 slave_dirs = ""
 
 case-name = 'case'
@@ -18,8 +18,8 @@ switches = []
 # NOTE working directory is assumed to be where this script is launched
 
 [model]
-skip = false # skips actual simulation, existing model output is used
-skip-pr = false
+skip = true # skips actual simulation, existing model output is used
+skip-pr = true
 silent = true
 sequence = ['ns', 'pr']
 
@@ -28,20 +28,20 @@ sequence = ['ns', 'pr']
 # which is usually something like real_model_xx, where xx is the sequence name.
 
 # specify at least Mulgrid geometry file here, needs .msh etc if running Waiwera
-geometry-files = ['raw/gOH68954.dat', 'raw/gOH68954.msh']
-incon-file = 'raw/NaturalState/waiOH68954_NS_486_incon.h5'
-ns-input-file = 'raw/NaturalState/waiOH68954_NS_486.json'
-pr-input-file = 'raw/Production/waiOH68954_PR_486.json'
+geometry-files = ['raw/gair_smodel.dat', 'raw/gair_smodel.msh']
+incon-file = 'raw/air_smodel_ns.incon'
+ns-input-file = 'raw/air_smodel_ns.dat'
+pr-input-file = 'raw/air_smodel_pr.dat'
 
 # optional original output file, useful for debug
-ns-output-file = 'raw/NaturalState/waiOH68954_NS_486.h5'
-pr-output-file = 'raw/Production/waiOH68954_PR_486.h5'
+ns-output-file = 'raw/air_smodel_ns.h5'
+pr-output-file = 'raw/air_smodel_pr.h5'
 
 [simulator]
-input-type = "waiwera" # "waiwera" or "aut2"
+input-type = "aut2" # "waiwera" or "aut2"
 output-type = "h5" # "listing" or "h5", will always be "h5" if input-type = "waiwera"
 
-executable = 'waiwera'
+executable = 'AUTOUGH2_7_1-7.exe'
 
 # these will be attached to the end of simulation command (useful for waiwera)
 cmd-options = []
