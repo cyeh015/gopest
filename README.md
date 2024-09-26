@@ -66,6 +66,6 @@ Several tasks were performed by the `init` command:
 - in run_ns_pr, code shouldn't worry about nesi/cluster related things, maybe
   not running local vs nesi either
 
-- remove obsreref rekated things, use pest_hp now
+- remove obsreref related things, use pest_hp now
 
 - I have checked a few PEST related Python libraries.  I am looking for something small and pure for basic editing of PEST control file.  But these are too big for my liking.  I should reconsider about using them.
