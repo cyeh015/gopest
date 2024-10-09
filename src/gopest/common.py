@@ -40,6 +40,9 @@ check_required('goPESTconfig.toml', 'Configuration')
 with open('goPESTconfig.toml', 'r') as f:
     config = tomlkit.load(f)
 
+    if 'silent_slaves' not in config['pest']:
+        config['pest']['silent_slaves'] = True
+
 """ this allows gopest.common.runtime to be used directly, eg.
         from gopest.common import runtime
         print(runtime['filename']['fincon'])

@@ -9,6 +9,7 @@ from gopest.common import config as cfg
 from gopest.common import runtime
 
 NUM_SLAVES = cfg['pest']['num_slaves']
+SILENT_SLAVES = cfg['pest']['silent_slaves']
 PST_NAME = cfg['pest']['case-name']
 PORT = cfg['pest']['port']
 SWITCHES = " ".join(cfg['pest']['switches'])
@@ -102,20 +103,28 @@ def run_cli(argv=[]):
         AGENT = BEOPEST
 
     generate_comm_files()
+    print('Running BeoPEST with silent=', SILENT_SLAVES)
 
     # each command is a tuple (args, other options), see subproces.Popen()
     master = ([MASTER, PST_NAME, SWITCHES, '/h :%s' % PORT], {} )
-    slaves = []
+    slaves, slaves_outs = [], []
     for i in range(NUM_SLAVES):
         s_dir = 'slave%i' % (i+1)
         if os.path.exists(s_dir):
             shutil.rmtree(s_dir)
         shutil.copytree('.', s_dir, ignore=ignore_dirs)
+        if SILENT_SLAVES:
+            # stdout_file = DEVNULL
+            stdout_file = open(s_dir + '/stdout.txt', 'w')
+            slaves_outs.append(stdout_file)
+        else:
+            stdout_file = None
         slaves.append((
             [AGENT, PST_NAME, '/h localhost:%s' % PORT],
             {
                 'cwd': s_dir,
-                'stdout': DEVNULL,
+                'stdout': stdout_file,
+                'stderr': stdout_file,
             }))
 
     # start master, sleep a bit, then start all slaves
@@ -126,6 +135,8 @@ def run_cli(argv=[]):
         ps.append(Popen(s[0], **s[1]))
     for p in ps:
         p.wait()
+    for f in slaves_outs:
+        f.close()
 
 def gen_run_management_file(nslave, slaves, wait=0.2, parlam=1, runtime=3600):
     """ generate run management file required by ppest/jactest.  I am
