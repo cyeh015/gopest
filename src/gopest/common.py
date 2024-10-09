@@ -58,6 +58,8 @@ def runtime_filenames(check=False):
         fincon = 'real_model_' + 'incon' + '.incon'
         fdato = 'real_model_' + 'original' + '.dat'
         fdats = ['real_model_' + seq + '.dat' for seq in sequence]
+        fincs = ['real_model_' + seq + '.incon' for seq in sequence]
+        fsavs = ['real_model_' + seq + '.save' for seq in sequence]
         if output_typ == 'h5':
             flsts = ['real_model_' + seq + '.h5' for seq in sequence]
         else:
@@ -68,6 +70,8 @@ def runtime_filenames(check=False):
         fdato = 'real_model_' + 'original' + '.json'
         fdats = ['real_model_' + seq + '.json' for seq in sequence]
         flsts = ['real_model_' + seq + '.h5' for seq in sequence]
+        fincs = ['real_model_' + seq + '_inc.h5' for seq in sequence]
+        fsavs = ['real_model_' + seq + '.h5' for seq in sequence]
     filenames = {
         # single string properties
         'geom': 'g_real_model.dat',
@@ -78,6 +82,8 @@ def runtime_filenames(check=False):
         'all_geoms': all_geoms,
         'dat_seq': fdats,
         'lst_seq': flsts,
+        'inc_seq': fincs,
+        'sav_seq': fsavs,
     }
     if check:
         for k,fnames in filenames.items():

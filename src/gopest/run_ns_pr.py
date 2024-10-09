@@ -501,61 +501,79 @@ def run_ns_pr_mixed(skippr=False, sav2inc=False, simulator='waiwera-dkr',
 
 def run_ns_pr_aut2(skippr=False, sav2inc=False, simulator='AUTOUGH2_3D',
                    allow_failed_ns=True, silent=True):
-    geo = mulgrid("g_real_model.dat")
-    inc = t2incon("real_model.incon")
-    inc.porosity = None
-    inc.write("real_model.incon", reset=True)
-    inc = t2incon("real_model.incon")
-    ns = t2data("real_model.dat")
-    ns = fix_co2_mass_ratio(ns)
-    ns.write(echo_extra_precision=True)
+    # fgeo = runtime['filename']['geom']
+    finc = runtime['filename']['incon']
+    fdats = runtime['filename']['dat_seq']
+    flsts = runtime['filename']['lst_seq']
+    fincs = runtime['filename']['inc_seq']
+    fsavs = runtime['filename']['sav_seq']
+    sequence = config['model']['sequence']
 
-    START_TIME = time.time()
-    ns.run(simulator=simulator, silent=silent)
-    sav = t2incon("real_model.save")
-    sav = ensure_converge(ns, sav, allow_failed_ns)
-    print('NS finished after ', (time.time() - START_TIME), 'seconds')
-    if sav is False:
-        return False
-    if sav2inc:
-        sav.write("real_model.incon", reset=True)
+    silent = config['model']['silent']
+    print('   -- aut2: %s is used.  (silent=%s)' % (simulator, str(silent)))
 
-    if skippr:
-        # fake real_model_pr.* because thats what pest_model.py will apply goPESTobs on
-        copy2('real_model.dat', 'real_model_pr.dat')
-        copy2('real_model.pdat', 'real_model_pr.pdat')
-        copy2('real_model.listing', 'real_model_pr.listing')
-        msg = 'Skipped PR, make sure to use NS result as PR for goPESTobs/pest_model'
-        print(msg)
-        return True
+    # geo = mulgrid("g_real_model.dat")
+    sav = t2incon(finc)
 
-    ##### everything below is production run
-    pr = t2data("real_model_original_pr.dat")
-    target_pr_time = pr.parameter['tstop']
-    # pr = set_output_times(pr, 15779000.0) # every half year
-    pr = set_output_times(pr, 31558000.0) # every year
+    for iseq,seq in enumerate(sequence):
+        sav.porosity = None
+        sav.write(fincs[iseq], reset=True)
+        inc = t2incon(fincs[iseq])
 
-    pr.grid = ns.grid
-    pr.clear_generators()
-    for g in ns.generatorlist:
-        pr.add_generator(g)
-    # Append all additinal generators at the end
-    gs_to_add = read_gener_file('production.geners')
-    for g in gs_to_add:
-        pr.add_generator(g)
+        # call user pre-processing
+        # user is responsible of reading/writing files
+        run_user_pre(seq)
 
-    pr.write("real_model_pr.dat", echo_extra_precision=True)
-    sav.write("real_model_pr.incon", reset=True)
+        ns = t2data(fdats[iseq])
+        ns.write(echo_extra_precision=True)
 
-    print('Running PR ...')
-    START_TIME = time.time()
-    pr.run(simulator=simulator, silent=silent)
-    print('PR finished after ', (time.time() - START_TIME), 'seconds')
+        START_TIME = time.time()
+        ns.run(simulator=simulator, silent=silent)
+        sav = t2incon(fsavs[iseq])
+        if seq == 'ns':
+            sav = ensure_converge(ns, sav, allow_failed_ns)
+            if sav is False:
+                return False
+            if sav2inc:
+                sav.write("real_model.incon", reset=True)
+        print('    - %s finished after ' % seq, (time.time() - START_TIME), 'seconds')
 
-    prsav = t2incon("real_model_pr.save")
-    if abs(prsav.timing['sumtim'] - target_pr_time) > 1000:
-        print('Warning PR ends at %e sec, did not reach target time: %e' % (float(prsav.timing['sumtim']), float(target_pr_time)))
-        print(''.join([line for line in tail('real_model_pr.listing', n=20)]))
+    # if skippr:
+    #     # fake real_model_pr.* because thats what pest_model.py will apply goPESTobs on
+    #     copy2('real_model.dat', 'real_model_pr.dat')
+    #     copy2('real_model.pdat', 'real_model_pr.pdat')
+    #     copy2('real_model.listing', 'real_model_pr.listing')
+    #     msg = 'Skipped PR, make sure to use NS result as PR for goPESTobs/pest_model'
+    #     print(msg)
+    #     return True
+
+    # ##### everything below is production run
+    # pr = t2data("real_model_original_pr.dat")
+    # target_pr_time = pr.parameter['tstop']
+    # # pr = set_output_times(pr, 15779000.0) # every half year
+    # pr = set_output_times(pr, 31558000.0) # every year
+
+    # pr.grid = ns.grid
+    # pr.clear_generators()
+    # for g in ns.generatorlist:
+    #     pr.add_generator(g)
+    # # Append all additinal generators at the end
+    # gs_to_add = read_gener_file('production.geners')
+    # for g in gs_to_add:
+    #     pr.add_generator(g)
+
+    # pr.write("real_model_pr.dat", echo_extra_precision=True)
+    # sav.write("real_model_pr.incon", reset=True)
+
+    # print('Running PR ...')
+    # START_TIME = time.time()
+    # pr.run(simulator=simulator, silent=silent)
+    # print('PR finished after ', (time.time() - START_TIME), 'seconds')
+
+    # prsav = t2incon("real_model_pr.save")
+    # if abs(prsav.timing['sumtim'] - target_pr_time) > 1000:
+    #     print('Warning PR ends at %e sec, did not reach target time: %e' % (float(prsav.timing['sumtim']), float(target_pr_time)))
+    #     print(''.join([line for line in tail('real_model_pr.listing', n=20)]))
 
     return True
 
