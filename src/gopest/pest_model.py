@@ -84,7 +84,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
         master_dir = '.'
     else:
         master_dir = get_master_dir()
-    print("--- Clean up pest_model.obf")
+    print("  --- Clean up pest_model.obf")
     if path.isfile('pest_model.obf'):
         remove('pest_model.obf')
 
@@ -100,7 +100,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
 
     ### SVD-assist
     if svda:
-        print("--- PARCALC")
+        print("  --- PARCALC")
         try:
             remove('pest_model.dat')
         except:
@@ -110,7 +110,7 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
 
     ### goPESTpar
     if not skiprun:
-        print("--- goPESTpar")
+        print("  --- goPESTpar")
         generate_real_model(fdato, 'pest_model.dat', fdats[0])
         # sleep(30)  # just in case shared file system slow
 
@@ -121,11 +121,11 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
         for parf in glob.glob(master_dir + sep + 'pest_model.dat.*'):
             if par_match(parf, 'pest_model.dat'):
                 matchname = path.splitext(parf)[1]
-                print("--- found matched incon/pars %s from master dir, overwrite Master INCON" % matchname)
+                print("  --- found matched incon/pars %s from master dir, overwrite Master INCON" % matchname)
                 copy2(master_dir + sep + fincon + matchname, master_dir + sep + fincon)
                 copy2(master_dir + sep + 'pest_model.obf' + matchname, 'pest_model.obf')
                 break
-        # print("--- remove all pairs from labmda tests after searching")
+        # print("  --- remove all pairs from labmda tests after searching")
         # for f in glob.glob(master_dir + sep + 'pest_model.obf.*'):
         #     remove(f)
         # for f in glob.glob(master_dir + sep + 'pest_model.dat.*'):
@@ -133,17 +133,17 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
         # for f in glob.glob(master_dir + sep + 'real_model.incon.*'):
         #     remove(f)
         if path.isfile('pest_model.obf'):
-            print("--- use obf, skip actual model run")
+            print("  --- use obf, skip actual model run")
             return
         else:
-            print("--- could not find matching pars, obsreref continue with normal run")
+            print("  --- could not find matching pars, obsreref continue with normal run")
 
     ### RUN TOUGH2 model
     if skiprun:
-        print("--- skip actual TOUGH2 run")
+        print("  --- skip actual TOUGH2 run")
     else:
         if not local:
-            print("--- use master INCON")
+            print("  --- use master INCON")
             try:
                 copy2(master_dir + sep + fincon, fincon)
             except Error as e:
@@ -151,29 +151,29 @@ def main(obsreref, svda, testup, local, skiprun, useobf, sendbad, skippr, hdf5, 
                 print(e)
 
         START_TIME = time.time()
-        print("--- run_ns_pr.py")
+        print("  --- run_ns_pr()")
         runok = run_ns_pr()
         if obsreref:
             if not local:
-                print("--- reset Master INCON")
+                print("  --- reset Master INCON")
                 copy2('real_model.incon', master_dir + sep + 'real_model.incon')
             else:
-                print("--- .save file written as .incon")
+                print("  --- .save file written as .incon")
         if sendbad:
             for f in glob.glob('bad_model_*'):
                 copy2(f, master_dir + sep + 'bad_model_slave' + get_slave_id() + '_' + f)
         if not runok:
-            print("--- run_ns_pr failed, skip goPESTobs, no obf, make sure lamforgive/derforgive is used.")
+            print("  --- run_ns_pr failed, skip goPESTobs, no obf, make sure lamforgive/derforgive is used.")
             return
-        print('--- run_ns_pr complete after', (time.time() - START_TIME), 'seconds')
+        print('  --- run_ns_pr() complete after', (time.time() - START_TIME), 'seconds')
 
     ### goPESTobs
     # sleep(30)  # just in case shared file system slow
-    print("--- goPESTobs")
+    print("  --- goPESTobs")
     read_from_real_model(fgeo, fdats[-1], flsts[-1], 'pest_model.obf', waiwera=waiwera)
 
     if testup:
-        print("--- store lambda test (save,obf,pars) pair:" + get_slave_id())
+        print("  --- store lambda test (save,obf,pars) pair:" + get_slave_id())
         copy2(fsave, master_dir + sep + fincon + '.' + get_slave_id())
         copy2('pest_model.dat', master_dir + sep + 'pest_model.dat.' + get_slave_id())
         copy2('pest_model.obf', master_dir + sep + 'pest_model.obf.' + get_slave_id())
