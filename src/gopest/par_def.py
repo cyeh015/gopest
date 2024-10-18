@@ -168,8 +168,8 @@ class massgener_rate(ParDef):
                 return
 
     def find_names_aut2(self, dat, pattern):
-        pattern = re.compile(name)
-        return [g.name for g in dat.generatorlist if pattern.match(g.name)]
+        rex = re.compile(pattern)
+        return [g.name for g in dat.generatorlist if rex.match(g.name)]
 
     def get_waiwera(self, dat, name):
         for source in dat['source']:
