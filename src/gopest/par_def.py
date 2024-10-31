@@ -55,6 +55,40 @@ class ParDef(object):
     def find_names_waiwera(self, dat, pattern):
         raise NotImplementedError(self.__class__.__name__)
 
+class delivgener_productivity(ParDef):
+    def get_aut2(self, dat, name):
+        for g in dat.generatorlist:
+            if g.name == name:
+                if g.type != 'DELG':
+                    msg = "Parameter type delivgener_productivity requires" \
+                          " gener '%s' being DELG type" % name
+                    raise Exception(msg)
+                return g.gx
+
+    def set_aut2(self, dat, name, value):
+        for g in dat.generatorlist:
+            if g.name == name:
+                g.gx = value
+                return
+
+    def find_names_aut2(self, dat, pattern):
+        rex = re.compile(pattern)
+        return [g.name for g in dat.generatorlist if rex.match(g.name)]
+
+    def get_waiwera(self, dat, name):
+        for source in dat['source']:
+            if source['name'] == name:
+                return source['deliverability']['productivity']
+
+    def set_waiwera(self, dat, name, value):
+        for source in dat['source']:
+            if source['name'] == name:
+                source['deliverability']['productivity'] = value
+
+    def find_names_waiwera(self, dat, pattern):
+        rex = re.compile(pattern)
+        return [s['name'] for s in dat['source'] if rex.match(s['name'])]
+
 class permeability_1_byrock(ParDef):
     def get_aut2(self, dat, name):
         return dat.grid.rocktype[name].permeability[0]
@@ -221,6 +255,7 @@ shortNames = {
 'RA' : 'permeability_123_byrock',  #tgra963
 'RS' : 'permeability_12_byrock',   #tgra963
 'RP' : 'porosity_byrock',
+'PI' : 'delivgener_productivity',
 'RE' : 'upflow_rech'
 }
 
