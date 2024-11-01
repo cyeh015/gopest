@@ -1,7 +1,7 @@
 pcf
 * control data
 restart  estimation
-4 16 9 0 7
+4 16 9 0 8
      1     1 single  point  1   0   0
 10.0  -20.0  0.3  0.03 -100 0 run_slow_fac=20.0 lamforgive derforgive
  10.0  10.0  0.001
@@ -35,6 +35,7 @@ RPupper log factor 0.15 0.01 0.5 por 1.0 0.0 1
  enth_g
  vpress
  boilp
+ massrate
 * observation data
  tt_GGL_1_0001         1.4320198019802e+02  3.50000e-02 temp
  tt_GGL_1_0002         1.6236329113924e+02  3.50000e-02 temp

@@ -85,6 +85,8 @@ shortNames = {
 'Uf' : 'totalupflow',
 'Ht' : 'totalheat',
 'Se' : 'target_time',
+'Ge' : 'gener_enthalpy',
+'Gr' : 'gener_rate',
 }
 
 # this for unique obs name
@@ -248,6 +250,74 @@ def external_modelresult(geo, dat, lst, userEntry):
         else:
             raise Exception
     return values
+
+def ns_gener_enthalpy_fielddata(geo, dat, userEntry):
+    obsInfo = userEntry.obsInfo
+    customFilter = userEntry.customFilter
+    obsDefault = userEntry.obsDefault
+
+    gname = eval(obsInfo[0])
+    expected_value = float(obsInfo[1])
+
+    obses = []
+    from copy import deepcopy
+    obs = deepcopy(obsDefault)
+    obs.OBSNME = unique_obs_name(obs.OBSNME, gname)
+    obs.OBSVAL = float(expected_value)
+    obses.append(obs)
+    return obses
+
+def ns_gener_enthalpy_modelresult(geo, dat, lst, userEntry):
+    from mulgrids import unfix_blockname
+    from mulgrids import fix_blockname
+    original_idx = lst.index
+    lst.last()
+    gname = eval(userEntry.obsInfo[0])
+    gname_fixed = fix_blockname(gname)
+    gname_unfixed = unfix_blockname(gname)
+    value = None
+    for bn,gn in lst.generation.row_name:
+        if gn in [gname, gname_fixed, gname_unfixed]:
+            value = lst.generation[(bn,gn)][FIELD['enth']]
+            break
+    lst.index = original_idx
+    if value is None:
+        raise Exception("No generation rate found for %s" % gname)
+    return [value]
+
+def ns_gener_rate_fielddata(geo, dat, userEntry):
+    obsInfo = userEntry.obsInfo
+    customFilter = userEntry.customFilter
+    obsDefault = userEntry.obsDefault
+
+    gname = eval(obsInfo[0])
+    expected_value = float(obsInfo[1])
+
+    obses = []
+    from copy import deepcopy
+    obs = deepcopy(obsDefault)
+    obs.OBSNME = unique_obs_name(obs.OBSNME, gname)
+    obs.OBSVAL = float(expected_value)
+    obses.append(obs)
+    return obses
+
+def ns_gener_rate_modelresult(geo, dat, lst, userEntry):
+    from mulgrids import unfix_blockname
+    from mulgrids import fix_blockname
+    original_idx = lst.index
+    lst.last()
+    gname = eval(userEntry.obsInfo[0])
+    gname_fixed = fix_blockname(gname)
+    gname_unfixed = unfix_blockname(gname)
+    value = None
+    for bn,gn in lst.generation.row_name:
+        if gn in [gname, gname_fixed, gname_unfixed]:
+            value = lst.generation[(bn,gn)][FIELD['rate']]
+            break
+    lst.index = original_idx
+    if value is None:
+        raise Exception("No generation rate found for %s" % gname)
+    return [value]
 
 def target_time_fielddata(geo, dat, userEntry):
     obsInfo = userEntry.obsInfo

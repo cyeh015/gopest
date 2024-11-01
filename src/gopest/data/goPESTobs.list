@@ -71,7 +71,31 @@ data_temp_downhole.json
 
 [END]
 
+[ObservationType]
+ns_gener_enthalpy
 
+[Defaults]
+OBSNME = 'ge'
+OBGNME = 'enth'
+
+WEIGHT = 2.0e-4
+
+[Obs]
+'AB123'
+1200.0e3
+
+[ObservationType]
+ns_gener_rate
+
+[Defaults]
+OBSNME = 'gr'
+OBGNME = 'massrate'
+
+WEIGHT = 1.0e2
+
+[Obs]
+'AB123'
+-0.10
 
 
 [ObservationType]
