@@ -216,6 +216,9 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         wai_ns = json.load(f)
     # overwrite these just to be safe
     wai_ns["output"]["filename"] = flsts[0]
+    wai_ns["output"]["frequency"] = 0
+    wai_ns["output"]["initial"] = False
+    wai_ns["output"]["final"] = True
     wai_ns["mesh"]["filename"] = "g_real_model.msh"
     wai_ns["initial"] = {"filename": finc, "index": inc_idx}
     if silent:
