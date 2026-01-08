@@ -46,7 +46,7 @@ if 'waiwera' in cfg['simulator']['executable']:
     sim = 'waiwera'
 else:
     sim = 'aut2'
-FIELD = {
+FIELD_DEF = {
     'aut2': {
         'temp': 'Temperature',
         'pres': 'Pressure',
@@ -61,8 +61,14 @@ FIELD = {
         'rate': 'source_rate',
         'enth': 'source_enthalpy',
     },
-}[sim]
+}
+FIELD = FIELD_DEF[sim]
 
+def get_field_name(lst, variable):
+    if 'autough2' in lst.simulator.lower():
+        return FIELD_DEF['aut2'][variable]
+    elif 'waiwera' in lst.simulator.lower():
+        return FIELD_DEF['waiwera'][variable]
 
 PLOT_RAW_FIELD_DATA = True
 
@@ -1069,7 +1075,7 @@ def temperature_thickness_gmf_modelresult(geo,dat,lst,userEntry):
             lst.index = np.abs(lst.fulltimes-t).argmin()
             t_prev = t
 
-        vals.append(lst.element[b][FIELD['temp']])
+        vals.append(lst.element[b][get_field_name(lst, 'temp')])
     return vals
 
 def temperature_thickness_json_fielddata(geo,dat,userEntry):
