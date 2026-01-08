@@ -69,3 +69,8 @@ Several tasks were performed by the `init` command:
 - remove obsreref related things, use pest_hp now
 
 - I have checked a few PEST related Python libraries.  I am looking for something small and pure for basic editing of PEST control file.  But these are too big for my liking.  I should reconsider about using them.
+
+
+## TODO
+
+- `gopest run` generate and use comm file `_gopest.json` now, update `gopest submit` to do so

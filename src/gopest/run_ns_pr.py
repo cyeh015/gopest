@@ -232,16 +232,23 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         ])
 
     model_args = [fdats[0]] + config['simulator']['cmd-options']
-    if config['mode'] == 'local':
-        cmd = [config['simulator']['executable']] + model_args
+    with open('_gopest.json', 'r') as f:
+        _gopest = json.load(f)
+
+    if _gopest['mode'] == 'local':
+        cfg_exe_raw = config['simulator']['executable']
+        if isinstance(cfg_exe_raw, list):
+            cmd = cfg_exe_raw + model_args
+        else:
+            cmd = [cfg_exe_raw] + model_args
     else:
         cmd = ['gopest', 'submit', '--forward3x', ' '.join(model_args)]
 
     START_TIME = time.time()
-    print('NS launched on %s...' % config['mode'])
+    print('NS launched on %s...' % _gopest['mode'])
     # run NS
     print(cmd)
-    subprocess.call(cmd)
+    subprocess.run(cmd, check=False)
 
     # check NS
     if os.path.exists(flsts[0]):
@@ -288,7 +295,7 @@ def run_ns_pr_waiwera(skippr=False, sav2inc=False, simulator='waiwera-dkr',
         ])
 
     model_args = [fdats[-1]] + config['simulator']['cmd-options']
-    if config['mode'] == 'local':
+    if _gopest['mode'] == 'local':
         cmd = [config['executable']] + model_args
     else:
         cmd = ['gopest', 'submit', '--forward3x', ' '.join(model_args)]
@@ -589,18 +596,19 @@ def run_ns_pr():
                                  sav2inc=True,
                                  simulator=config['simulator']['executable'],
                                  allow_failed_ns=True,
-                                 silent=False)
+                                 silent=config['model']['silent'])
     elif config['simulator']['input-type'] == 'aut2':
         return run_ns_pr_aut2(skippr=config['model']['skip-pr'],
                               sav2inc=False,
                               simulator=config['simulator']['executable'],
                               allow_failed_ns=True,
-                              silent=False)
+                              silent=config['model']['silent'])
     else:
         raise NotImplementedError('No implementation of run_ns_pr() for input-type: ' + config['simulator']['input-type'])
 
 def main_cli(argv=[]):
     skippr = config['model']['skip-pr']
+    silent = config['model']['silent']
     sav2inc = False
 
     if len(argv) > 1:
@@ -610,8 +618,8 @@ def main_cli(argv=[]):
             sav2inc = True
 
     if config['simulator']['input-type'] == 'waiwera':
-        run_ns_pr_waiwera(skippr, sav2inc, simulator=get_t2(), silent=True)
+        run_ns_pr_waiwera(skippr, sav2inc, simulator=get_t2(), silent=silent)
     else:
-        run_ns_pr_aut2(skippr=False, sav2inc=False,
+        run_ns_pr_aut2(skippr=skippr, sav2inc=False,
                        simulator=config['simulator']['executable'],
-                       allow_failed_ns=True, silent=True)
+                       allow_failed_ns=True, silent=silent)

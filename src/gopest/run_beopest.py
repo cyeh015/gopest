@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 import time
+import json
 from subprocess import Popen, DEVNULL
 from multiprocessing import cpu_count
 
@@ -92,6 +93,7 @@ def run_cli(argv=[]):
     """ generate master and slave commands, copy files into slave directories,
     and launch them as process, wait until all finished.
     """
+
     if "pest_hp" in BEOPEST.lower():
         MASTER = BEOPEST
         if PESTDIR:
@@ -199,7 +201,17 @@ def generate_comm_files():
             f.write(line)
     write_to('_master_dir', os.getcwd())
     write_to('_pest_dir', PESTDIR)
-    write_to('_tough2', TOUGH2)
+    if isinstance(TOUGH2, list):
+        write_to('_tough2', ' '.join(TOUGH2))
+    else:
+        write_to('_tough2', TOUGH2)
+    with open('_gopest.json', 'w') as f:
+        json.dump({
+            'master_dir': os.getcwd(),
+            'pest_dir': PESTDIR,
+            'tough2': TOUGH2,
+            'mode': 'local'
+            }, f, indent=2)
 
 if __name__ == '__main__':
     run_cli()
