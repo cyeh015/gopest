@@ -21,6 +21,7 @@ classifiers = [
 ]
 dependencies = [
     "PyTOUGH",
+    "gimu",
     "numpy",
     "scipy",
     "h5py",

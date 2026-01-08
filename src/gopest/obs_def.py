@@ -40,6 +40,7 @@
 # I have done something major to allow the more flexible ways of specifying each observation.
 
 from gopest.common import config as cfg
+from gopest.common import private_cleanup_name
 
 if 'waiwera' in cfg['simulator']['executable']:
     sim = 'waiwera'
@@ -77,6 +78,7 @@ shortNames = {
 'Pj' : 'pressure_block_average_json',
 'Tw' : 'temperature',
 'Th' : 'temperature_thickness',
+'Tf' : 'temperature_thickness_gmf',
 'Tj' : 'temperature_thickness_json',
 'Ti' : 'temp_interp_thickness_json',
 'Tb' : 'blocktemperature',
@@ -968,6 +970,97 @@ def temp_interp_thickness_json_modelresult(geo,dat,lst,userEntry):
             vals.append(v[0])
     return vals
 
+def temperature_thickness_gmf_fielddata(geo,dat,userEntry):
+    gmd_dir = userEntry.obsInfo[0]
+    customFilter = userEntry.customFilter
+    offsetTime = userEntry.offsetTime
+    obsDefault = userEntry.obsDefault
+    tFactor = 365.25*24.*60.*60.
+
+    from gimu.gmf.data import data_json
+    from gimu.easy_date import date_string_to_date, toYearFraction
+
+    data_json.add_data_folder(gmd_dir)
+    obses = []
+    for oline in userEntry.obsInfo[1:]:
+        well, date_str = eval(oline)
+        time = toYearFraction(date_string_to_date(date_str))
+        data = data_json[well]
+        geo_well_name = data['AUT2_Name']
+        raw_data = data['Downhole_Temperature'][date_str]['Data']
+
+        allelev, alltemp = [], []
+        for elev_str, temp in raw_data.items():
+            elev = float(elev_str)
+            allelev.append(elev)
+            alltemp.append(temp)
+        if len(allelev) <= 1:
+            print('temperature_thickness_json: User entry has no data, skipping: %s' % wname)
+            continue
+
+        (bs, bs_c) = private_well_track_blocks(geo, geo_well_name)
+        blocks, blocks_cen, blocks_thickness = [], [], []
+        for (b,c) in zip(bs, bs_c):
+            if allelev[-1] <= c <= allelev[0]:
+                blocks.append(b)
+                blocks_cen.append(c)
+                blocks_thickness.append(geo.layer[geo.layer_name(b)].thickness)
+
+        # blocks and blocks_cen ready for use
+        from numpy import interp
+        blocks_temp = interp(blocks_cen,allelev[::-1],alltemp[::-1])
+
+        baseName = obsDefault.OBSNME +'_'+ private_cleanup_name(geo_well_name)[:5]
+        if baseName not in obsBaseNameCount:
+            obsBaseNameCount[baseName] = 0
+
+        if obsDefault.OBGNME not in userEntry.coverage:
+            userEntry.coverage[obsDefault.OBGNME] = []
+        for (b,t,h) in zip(blocks,blocks_temp, blocks_thickness):
+            obsBaseNameCount[baseName] += 1
+            from copy import deepcopy
+            obs = deepcopy(obsDefault)
+            obs.OBSNME = baseName +'_'+ ('%04d' % obsBaseNameCount[baseName])
+            obs.OBSVAL = t
+            obs.WEIGHT = h * obsDefault.WEIGHT
+            # additional for model result extraction
+            obs._block_ = b
+            obs._dtime_ = time * tFactor - offsetTime # data's time tag
+            userEntry.coverage[obsDefault.OBGNME].append(b)
+            obses.append(obs)
+
+        # generate batch plot entries
+        plot = temperature_plot(
+            geo_well_name, time, blocks_cen, list(blocks_temp),
+            baseName, ('Well %s at time %f' % (well,time)) )
+        if PLOT_RAW_FIELD_DATA:
+            y, x = allelev, alltemp
+            plot = plot_append_raw_data(plot, 'raw_'+well, x, y, xunit="degC", yunit="meter")
+        userEntry.batch_plot_entry.append(plot)
+        # generate batch plot entries
+        # userEntry.batch_plot_entry.append(temperature_plot(
+        #     wname, time, allelev, alltemp,
+        #     baseName, ('Well %s at time %f' % (wname,time)) ))
+
+    return obses
+
+def temperature_thickness_gmf_modelresult(geo,dat,lst,userEntry):
+    import numpy as np
+    obses = temperature_thickness_gmf_fielddata(geo, dat, userEntry)
+    vals = []
+    t_prev = obses[0]._dtime_
+    lst.index = np.abs(lst.fulltimes-t_prev).argmin()
+    for obs in obses:
+        b = obs._block_
+        t = obs._dtime_
+
+        # TODO, this is slow, can be much faster
+        if t != t_prev:
+            lst.index = np.abs(lst.fulltimes-t).argmin()
+            t_prev = t
+
+        vals.append(lst.element[b][FIELD['temp']])
+    return vals
 
 def temperature_thickness_json_fielddata(geo,dat,userEntry):
     """ This is very simialr to the norml temperature obs type, only that the
