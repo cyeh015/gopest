@@ -1,3 +1,4 @@
+.DS_Store
 src/gopest/_version.py
 *.pyc
 build/
