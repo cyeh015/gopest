@@ -1,16 +1,20 @@
 import json
-from os.path import splitext, basename, isfile
+import subprocess
+from os.path import splitext, basename, isfile, join, exists
 import inspect
 import functools
 from collections import OrderedDict
 
 from t2data import *
+import h5py
 
 from gopest.common import TwoWayDict
 from gopest.common import Singleton
 from gopest.common import readList
 from gopest.common import updateObj
 from gopest.common import private_cleanup_name
+
+from gopest.run_ns_pr import run_user_pre
 
 # implementation:
 #   a user entry is something simple a user can undersand and easily enter
@@ -21,6 +25,7 @@ from gopest.common import private_cleanup_name
 # i need a dictionary, leys of parameter data type (short), which maps to
 # functions from the user defined functions that can modify t2data objects
 
+from gopest.common import runtime
 from gopest.common import config as cfg
 INPUT_TYPE = cfg['simulator']['input-type']
 
@@ -330,3 +335,95 @@ def goPESTpar(argv=[]):
         realInput = argv[3]
 
         generate_real_model(origInput, pestModel, realInput)
+
+def par2real_cli(argv=[]):
+    case_name = cfg['pest']['case-name']
+
+    if len(argv) == 2:
+        par_file = argv[1]
+    else:
+        par_file = case_name + '.par'
+
+    tpl_file = 'pest_model.tpl'
+
+    tempchek = 'tempchek'
+    if 'utility' in cfg['pest']:
+        if 'dir' in cfg['pest']['utility']:
+            tempchek  = join(cfg['pest']['utility']['dir'], tempchek)
+
+    par_found = isfile(par_file)
+    cmd_found = isfile(tempchek)
+    tpl_found = isfile(tpl_file)
+    msg = "\n".join([
+        "goPEST command - par2real - make real model from .par",
+        "",
+        "Requires:",
+        f"    PEST generated {par_file} found: {par_found}",
+        f"    PEST utility 'tempchek' found: {cmd_found}",
+        f"    goPEST generated 'pest_model.tpl' found: {tpl_found}",
+        "",
+        ])
+
+    print(msg)
+
+    if not all([par_found, cmd_found, tpl_found]):
+        print("Please ensure the required files are available.")
+        exit(1)
+
+    print("Running:")
+    cmd = [tempchek, 'pest_model.tpl', 'pest_model.dat', par_file]
+    print(f"    {' '.join(cmd)}")
+    print("    ---")
+    subprocess.run(cmd)
+    print("    ---")
+
+    from pprint import pprint
+    # pprint(runtime)
+
+    dat_orig_file = runtime['filename']['dat_orig']
+    dat_file = runtime['filename']['dat_seq'][0]
+    print("")
+    print(f"    generate_real_model({dat_orig_file}, pest_model.dat", {dat_file})
+    generate_real_model(dat_orig_file, 'pest_model.dat', dat_file)
+    user_func_name = run_user_pre(cfg['model']['sequence'][0])
+    if user_func_name:
+        print(f"    goPESTuser.py: {user_func_name}")
+
+    inc_file = runtime['filename']['incon']
+    lst_file = runtime['filename']['lst_seq'][0]
+    msh_file = None
+    for file in runtime['filename']['all_geoms']:
+        if file.endswith('.msh') or file.endswith('.exo'):
+            msh_file = file
+            break
+
+    if cfg['simulator']['input-type'] == 'waiwera':
+        print(f"    Fixing Waiwera input file: {dat_file}")
+        if exists(inc_file):
+            # check incon
+            inc_h5 = h5py.File(inc_file, 'r')
+            inc_idx = len(inc_h5['time'][:,0]) - 1
+            if inc_idx < 0:
+                inc_h5.close()
+                raise Exception("ERROR! Waiwera initial conditions file '%s' has no data." % inc_file)
+            inc_h5.close()
+        else:
+            raise Exception("Error! Waiwera initial conditions file '%s' not found." % inc_file)
+
+
+        with open(dat_file, 'r') as f:
+            wai_ns = json.load(f)
+        # overwrite these just to be safe
+        wai_ns["output"]["filename"] = lst_file
+        wai_ns["output"]["frequency"] = 0
+        wai_ns["output"]["initial"] = False
+        wai_ns["output"]["final"] = True
+        wai_ns["mesh"]["filename"] = msh_file
+        wai_ns["initial"] = {"filename": inc_file, "index": inc_idx}
+        wai_ns["logfile"] = {"echo": True}
+        wai_ns["title"] = wai_ns["title"] + f" updated by goPEST: gopest " + " ".join(argv)
+        with open(dat_file, 'w') as f:
+            json.dump(wai_ns, f, indent=2, sort_keys=True)
+
+
+

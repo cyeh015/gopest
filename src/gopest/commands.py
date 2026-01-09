@@ -23,6 +23,7 @@ Supported COMMANDs:
     run-forward                             (run_ns_pr)
     save-iter-files                         (rename_latest_files)
     check-slaves                            (check_slaves)
+    par2real [par file]                     (make real model from .par)
 
 Important files for goPEST to work:
     goPESTconfig.toml
@@ -65,6 +66,7 @@ def gopest_cli():
                 'init': gopest.make_case_pst.make_case_cli,
                 'save-iter-files': gopest.rename_latest_files.rename_latest_files,
                 'check-slaves': gopest.check_slaves.check_slaves_cli,
+                'par2real': gopest.par.par2real_cli,
             }
             if sys.argv[1] not in cmds:
                 print(version + hlp)
