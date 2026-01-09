@@ -219,6 +219,35 @@ class massgener_rate(ParDef):
         rex = re.compile(pattern)
         return [s['name'] for s in dat['source'] if rex.match(s['name'])]
 
+class massgener_enth(ParDef):
+    def get_aut2(self, dat, name):
+        for g in dat.generatorlist:
+            if g.name == name:
+                return g.ex
+
+    def set_aut2(self, dat, name, value):
+        for g in dat.generatorlist:
+            if g.name == name:
+                g.ex = value
+                return
+
+    def find_names_aut2(self, dat, pattern):
+        rex = re.compile(pattern)
+        return [g.name for g in dat.generatorlist if rex.match(g.name)]
+
+    def get_waiwera(self, dat, name):
+        for source in dat['source']:
+            if source['name'] == name:
+                return source['enthalpy']
+
+    def set_waiwera(self, dat, name, value):
+        for source in dat['source']:
+            if source['name'] == name:
+                source['enthalpy'] = value
+
+    def find_names_waiwera(self, dat, pattern):
+        rex = re.compile(pattern)
+        return [s['name'] for s in dat['source'] if rex.match(s['name'])]
 
 class json_values(ParDef):
     def get_aut2(self, dat, name):
@@ -275,16 +304,6 @@ def heatgener_rate(names,dat,val=None):
         for g in dat.generatorlist:
             if g.name in names:
                 g.gx = val
-
-def massgener_enth(names,dat,val=None):
-    if val is None:
-        for g in dat.generatorlist:
-            if g.name in names:
-                return g.ex
-    else:
-        for g in dat.generatorlist:
-            if g.name in names:
-                g.ex = val
 
 def infiltration(names,dat,val=None):
     if val is None:
