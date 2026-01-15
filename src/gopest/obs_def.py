@@ -836,11 +836,7 @@ def _well_interp_temp(block_i_by_layer, well_poses, geo, lst):
     layers same as block_i_by_layer.
     """
     import scipy.interpolate as interpolate
-    # will cause error if no field name found
-    for field in lst.element.column_name:
-        if field.startswith('Temperatu'):
-            field_name = field
-            break
+    field_name = get_field_name(lst, 'temp')
     temps = []
     for blocks_i, pos in zip(block_i_by_layer, well_poses):
         v = lst.element[field_name][blocks_i]
