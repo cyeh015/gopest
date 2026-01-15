@@ -1011,7 +1011,7 @@ def temperature_thickness_gmf_fielddata(geo,dat,userEntry):
             allelev.append(elev)
             alltemp.append(temp)
         if len(allelev) <= 1:
-            print('temperature_thickness_json: User entry has no data, skipping: %s' % wname)
+            print('temperature_thickness_gmf: User entry has no data, skipping: %s' % wname)
             continue
 
         (bs, bs_c) = private_well_track_blocks(geo, geo_well_name)
