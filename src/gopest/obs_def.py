@@ -85,6 +85,7 @@ shortNames = {
 'Tw' : 'temperature',
 'Th' : 'temperature_thickness',
 'Tf' : 'temperature_thickness_gmf',
+'Tg' : 'temp_interp_thickness_gmf',
 'Tj' : 'temperature_thickness_json',
 'Ti' : 'temp_interp_thickness_json',
 'Tb' : 'blocktemperature',
@@ -948,6 +949,132 @@ def temp_interp_thickness_json_modelresult(geo,dat,lst,userEntry):
     print('+++ use field: %s' % field_name)
 
     obses = temp_interp_thickness_json_fielddata(geo, dat, userEntry)
+    vals = []
+
+    t_prev = obses[0]._dtime_
+    lst.index = np.abs(lst.fulltimes-t_prev).argmin()
+    for obs in obses:
+        bis = obs._bindx_
+        wps = obs._wpos_
+        t = obs._dtime_
+
+        # TODO, this is slow, can be much faster
+        if t != t_prev:
+            lst.index = np.abs(lst.fulltimes-t).argmin()
+            t_prev = t
+
+        v = lst.element[field_name][bis]
+        cols = [geo.column_name(geo.block_name_list[bi]) for bi in bis]
+        points = [geo.column[c].centre for c in cols]
+        if len(points) > 1:
+            vi = interpolate.griddata(points, v, [wps[:2]], method='linear')
+            vals.append(vi[0])
+        else:
+            vals.append(v[0])
+    return vals
+
+def temp_interp_thickness_gmf_fielddata(geo,dat,userEntry):
+    gmd_dir = userEntry.obsInfo[0]
+    jfilename = userEntry.obsInfo[0]
+    customFilter = userEntry.customFilter
+    offsetTime = userEntry.offsetTime
+    obsDefault = userEntry.obsDefault
+    tFactor = 365.25*24.*60.*60.
+
+
+    from gimu.gmf.data import data_json
+    from gimu.easy_date import date_string_to_date, toYearFraction
+
+    data_json.add_data_folder(gmd_dir)
+
+    # import json
+    # # 1st line is json file name (of all wells)
+    # with open(jfilename, 'r') as f:
+    #     t_bywell = json.load(f)
+
+    obses = []
+
+    for oline in userEntry.obsInfo[1:]:
+        well, date_str = eval(oline)
+
+        data = data_json[well]
+        geo_well_name = data['AUT2_Name']
+        allelev, alltemp = [], []
+        for elev,temp in zip(*data.downhole_temperature(date_str)):
+            if eval(customFilter):
+                allelev.append(elev)
+                alltemp.append(temp)
+        if len(allelev) <= 1:
+            print('temp_interp_thickness_gmf: User entry has no data, skipping: %s' % well)
+            continue
+        time = toYearFraction(date_string_to_date(date_str))
+
+        # bis, wps, es = blk indices, well positions, elevations
+        bis, wps, es = _well_interp_layers(geo_well_name, geo)
+        blocks, blocks_cen, blocks_thickness = [], [], []
+        bis2, wps2, es2, bhs2 = [], [], [], []
+        for bidx, wpos, elev in zip(bis, wps, es):
+            if elev > allelev[0] or elev < allelev[-1]:
+                # skip if out of field data range
+                continue
+            if eval(customFilter):
+                bis2.append(bidx)
+                wps2.append(wpos)
+                es2.append(elev)
+                # all same layer, just use first one
+                lay = geo.layer_name(geo.block_name_list[bidx[0]])
+                bhs2.append(geo.layer[lay].thickness)
+
+        # blocks and blocks_cen ready for use
+        from numpy import interp
+        blocks_temp = interp(es2, allelev[::-1],alltemp[::-1])
+
+        from gopest.common import private_cleanup_name
+        baseName = obsDefault.OBSNME +'_'+ private_cleanup_name(geo_well_name)[:5]
+        if baseName not in obsBaseNameCount:
+            obsBaseNameCount[baseName] = 0
+
+        if obsDefault.OBGNME not in userEntry.coverage:
+            userEntry.coverage[obsDefault.OBGNME] = []
+            userEntry.coverage[obsDefault.OBGNME+'_interp_source'] = []
+
+
+
+        for bidx,pos,t,h in zip(bis2, wps2, blocks_temp, bhs2):
+            obsBaseNameCount[baseName] += 1
+            from copy import deepcopy
+            obs = deepcopy(obsDefault)
+            obs.OBSNME = baseName +'_'+ ('%04d' % obsBaseNameCount[baseName])
+            obs.OBSVAL = t
+            obs.WEIGHT = h * obsDefault.WEIGHT
+            # additional for model result extraction
+            obs._bindx_ = bidx
+            obs._wpos_ = pos
+            obs._dtime_ = time * tFactor - offsetTime # data's time tag
+            blks = [geo.block_name_list[i] for i in bidx]
+            userEntry.coverage[obsDefault.OBGNME] = userEntry.coverage[obsDefault.OBGNME] + blks
+            userEntry.coverage[obsDefault.OBGNME+'_interp_source'].append((
+                obs.OBSNME, bidx))
+            obses.append(obs)
+
+        # generate batch plot entries
+        plot = temperature_plot(
+            geo_well_name, time, list(es2), list(blocks_temp),
+            baseName, ('Well %s at time %f' % (well,time)) )
+        if PLOT_RAW_FIELD_DATA:
+            y, x = allelev, alltemp
+            plot = plot_append_raw_data(plot, 'raw_'+well, x, y, xunit="degC", yunit="meter")
+        userEntry.batch_plot_entry.append(plot)
+
+    return obses
+
+def temp_interp_thickness_gmf_modelresult(geo,dat,lst,userEntry):
+    import numpy as np
+    import scipy.interpolate as interpolate
+    field_name = get_field_name(lst, 'temp')
+    print('+++ use field: %s' % field_name)
+
+    obses = temp_interp_thickness_gmf_fielddata(geo, dat, userEntry)
     vals = []
 
     t_prev = obses[0]._dtime_
