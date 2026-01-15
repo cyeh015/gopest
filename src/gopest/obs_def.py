@@ -986,29 +986,18 @@ def temperature_thickness_gmf_fielddata(geo,dat,userEntry):
     obses = []
     for oline in userEntry.obsInfo[1:]:
         well, date_str = eval(oline)
-        try:
-            data = data_json[well]
-        except KeyError as e:
-            print(f"Well '{well}' does not exist in field data folder '{gmd_dir}'")
-            print(f"-> available wells are: {list(data_json.wells)}")
-            raise e
-        geo_well_name = data['AUT2_Name']
-        try:
-            raw_data = data['Downhole_Temperature'][date_str]['Data']
-        except KeyError as e:
-            print(f"Data '{date_str}' does not exist in {well}")
-            print(f"-> available data set are: {list(data['Downhole_Temperature'].keys())}")
-            raise e
-        time = toYearFraction(date_string_to_date(date_str))
 
+        data = data_json[well]
+        geo_well_name = data['AUT2_Name']
         allelev, alltemp = [], []
-        for elev_str, temp in raw_data.items():
-            elev = float(elev_str)
-            allelev.append(elev)
-            alltemp.append(temp)
+        for elev,temp in zip(*data.downhole_temperature(date_str)):
+            if eval(customFilter):
+                allelev.append(elev)
+                alltemp.append(temp)
         if len(allelev) <= 1:
-            print('temperature_thickness_gmf: User entry has no data, skipping: %s' % wname)
+            print('temperature_thickness_gmf: User entry has no data, skipping: %s' % well)
             continue
+        time = toYearFraction(date_string_to_date(date_str))
 
         (bs, bs_c) = private_well_track_blocks(geo, geo_well_name)
         blocks, blocks_cen, blocks_thickness = [], [], []
